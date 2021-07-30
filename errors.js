@@ -15,6 +15,17 @@ class LotteryCloseError extends Error {
 
 }
 
+class NumberOutOfRangeError extends Error {
+    constructor(props) {
+        super(props)
+        this.name = 'LotteryCloseError'
+        this.message = 'Choose a number between x and x.'
+    }
+
+}
+
 module.exports = {
     AlreadyVotedError,
+    LotteryCloseError,
+    NumberOutOfRangeError,
 }

@@ -1,9 +1,14 @@
-const {AlreadyVotedError} = require('./errors');
+const {
+    LotteryCloseError,
+    AlreadyVotedError,
+    NumberOutOfRangeError
+} = require('./errors')
 
 module.exports = class Lottery {
     constructor() {
         this._users = []
         this._status = false
+        this.range = {min: 1, max: 100}
     }
 
     get status() {
@@ -14,13 +19,21 @@ module.exports = class Lottery {
         this._status = value
     }
 
+    set minRange(range) {
+        this.range.min = range
+    }
+
+    set maxRange(range) {
+        this.range.max = range
+    }
+
     get users() {
         return this._users
     }
 
     addClient(client) {
         // user already exists
-        if(this._users.find(user => user.user.id === client.id)) {
+        if (this.users.find(user => user.user.id === client.id)) {
             return false
         }
 
@@ -34,7 +47,7 @@ module.exports = class Lottery {
 
     addVote(client, guessNumber) {
 
-        if(!this.status) {
+        if (!this.status) {
             throw new LotteryCloseError()
         }
 
@@ -42,7 +55,11 @@ module.exports = class Lottery {
             throw new AlreadyVotedError()
         }
 
-        let user = this._users.find(user => user.user.id === client.id)
+        if (guessNumber > this.range.max || guessNumber < this.range.min) {
+            throw new NumberOutOfRangeError()
+        }
+
+        let user = this.users.find(user => user.user.id === client.id)
         user.number = guessNumber
     }
 
