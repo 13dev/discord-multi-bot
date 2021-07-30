@@ -15,9 +15,8 @@ client.on('ready', () => {
 
 client.on('message', message => {
 
-    if (message.author.bot) return;
-
-    if (message.content.indexOf(PREFIX) !== 0) return;
+    if (message.author.bot) return
+    if (message.content.indexOf(PREFIX) !== 0) return
 
     const args = message.content.slice(PREFIX.length)
         .trim()
@@ -28,26 +27,50 @@ client.on('message', message => {
         .toLowerCase();
 
     //command is PREFIX+lottery? ex: -lottery
-    // if(command !== 'lottery') {
-    //     return
-    // }
-
-    //is in the correct channel?
-    if(message.channel.name !== CHANNEL) {
+    if (command !== 'lottery') {
         return
     }
 
-    if(command === 'dump') {
-
-        lottery.addClient(43534)
-        lottery.addVote(43534, 31)
-        lottery.addClient(43531)
-        lottery.addVote(43531, 13)
-        lottery.isNumberVoted(13)
-
-        message.reply('```js ' + JSON.stringify(lottery.users) + ' ```')
+    //is in the correct channel?
+    if (message.channel.name !== CHANNEL) {
+        return
     }
 
+    // first argument is the operation
+    // second argument values.
+
+    console.log(args)
+    try {
+        switch (args[0]) {
+            case 'vote': {
+                lottery.addClient(message.author)
+                lottery.addVote(message.author, args[1])
+                break
+            }
+            case 'dump': {
+                message.reply('```js ' + JSON.stringify(lottery.users) + ' ```')
+                console.log(lottery.users)
+                break
+            }
+
+            case 'list': {
+                console.log(message)
+                let output = '\n'
+
+                lottery.users.forEach(entry => {
+                    output += entry.user + ' - ' + entry.number + '\n'
+                })
+
+                message.reply('```' + output + '```')
+                break
+            }
+        }
+    } catch (e) {
+        message.reply(e.message)
+    }
+
+
 });
+
 
 client.login(TOKEN);

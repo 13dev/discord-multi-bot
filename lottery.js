@@ -1,6 +1,8 @@
+const {AlreadyVotedError} = require('./errors');
+
 module.exports = class Lottery {
     constructor() {
-        this._users = {}
+        this._users = []
         this._status = false
     }
 
@@ -16,31 +18,40 @@ module.exports = class Lottery {
         return this._users
     }
 
-    addClient(clientId) {
-        if (this._users.hasOwnProperty(clientId.toString())) {
-            return false;
-        }
+    addClient(client) {
+        this._users.push({
+            user: client,
+            number: null,
+        })
 
-        this._users[clientId.toString()] = {};
+        return true
     }
 
-    addVote(clientId, guessNumber) {
-        this._users[clientId.toString()].number = guessNumber;
+    addVote(client, guessNumber) {
+        if (this.isNumberVoted(guessNumber)) {
+            throw new AlreadyVotedError()
+        }
+
+        let user = this._users.find(user => user.id === client.id)
+        user.number = guessNumber
     }
 
     startLottery() {
-        this._status = true;
+        this._status = true
     }
 
     chooseWinner() {
         // do stuff
     }
 
+    getNumbers() {
+        return Object.values(this.users).map(user => user.number)
+    }
+
     isNumberVoted(number) {
-        let numbers = Object.values(this.users).map(user => user.number)
-        return numbers.includes(number)
+        return this.getNumbers().includes(number)
     }
 
 }
 
-//[{223: {}}]
+//[{user: {}, number: 1}]
