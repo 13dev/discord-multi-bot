@@ -3,9 +3,11 @@ const Discord = require('discord.js')
 const client = new Discord.Client()
 
 const {TOKEN, CHANNEL, PREFIX} = process.env
-const {VOTE, LIST, DUMP} = require('./operations')
-const Lottery = require('./lottery.js')
+const {VOTE, LIST, DUMP} = require('./options')
+const Lottery = require('./lottery')
 const lottery = new Lottery()
+const OptionsHandler = require('./options-handler')
+
 
 
 client.on('ready', () => {
@@ -37,31 +39,13 @@ client.on('message', message => {
 
     // first argument is the operation
     // second argument values.
-
-    console.log(args)
     try {
+        const optionsHandler = new OptionsHandler(lottery, message)
+
         switch (args[0]) {
-            case VOTE: {
-                lottery.addClient(message.author)
-                lottery.addVote(message.author, args[1])
-                break
-            }
-            case DUMP: {
-                message.reply('```js ' + JSON.stringify(lottery.users) + ' ```')
-                console.log(lottery.users)
-                break
-            }
-
-            case LIST: {
-                let output = '\n'
-
-                lottery.users.forEach(entry => {
-                    output += `Username: ${entry.user.username}, Number: ${entry.number} \n`
-                })
-
-                message.reply('```' + output + '```')
-                break
-            }
+            case VOTE: optionsHandler.handleVote(args[1]); break
+            case DUMP: optionsHandler.handleDump(); break
+            case LIST: optionsHandler.handleList(); break
         }
     } catch (e) {
         message.reply(e.message)
