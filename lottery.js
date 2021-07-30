@@ -19,6 +19,11 @@ module.exports = class Lottery {
     }
 
     addClient(client) {
+        // user already exists
+        if(this._users.find(user => user.user.id === client.id)) {
+            return false
+        }
+
         this._users.push({
             user: client,
             number: null,

@@ -1,9 +1,9 @@
 require('dotenv').config();
+const Discord = require('discord.js')
+const client = new Discord.Client()
 
 const {TOKEN, CHANNEL, PREFIX} = process.env
 const {VOTE, LIST, DUMP} = require('./operations')
-const Discord = require('discord.js')
-const client = new Discord.Client()
 const Lottery = require('./lottery.js')
 const lottery = new Lottery()
 
@@ -19,11 +19,11 @@ client.on('message', message => {
 
     const args = message.content.slice(PREFIX.length)
         .trim()
-        .split(/ +/g);
+        .split(/ +/g)
 
     const command = args
         .shift()
-        .toLowerCase();
+        .toLowerCase()
 
     //command is PREFIX+lottery? ex: -lottery
     if (command !== 'lottery') {
