@@ -3,4 +3,5 @@ module.exports = {
     DUMP: 'dump',
     VOTE: 'vote',
     RANGE: 'range',
+    START_LOTERY: 'start',
 }

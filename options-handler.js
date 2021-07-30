@@ -35,4 +35,14 @@ module.exports = class OptionsHandler {
 
         this.listener.reply(`Users can now vote between ${min} and ${max}!`)
     }
+
+    handleStartLotery() {
+        if(this.lotteryInstance.status) {
+            this.listener.reply(`Lottery is already open!`)
+        }
+
+        this.lotteryInstance.startLottery()
+
+        this.listener.channel.send(`@everyone The lottery has begun, good luck!`)
+    }
 }
