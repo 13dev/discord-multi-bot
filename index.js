@@ -1,13 +1,12 @@
 require('dotenv').config();
 
-const {TOKEN, CHANNEL, PREFIX} = process.env;
-const Discord = require('discord.js');
-const client = new Discord.Client();
-const Lottery = require('./lottery.js');
-const lottery = new Lottery();
+const {TOKEN, CHANNEL, PREFIX} = process.env
+const {VOTE, LIST, DUMP} = require('./operations')
+const Discord = require('discord.js')
+const client = new Discord.Client()
+const Lottery = require('./lottery.js')
+const lottery = new Lottery()
 
-let usersLotteryList = [];
-let lotteryBool = false;
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -42,23 +41,22 @@ client.on('message', message => {
     console.log(args)
     try {
         switch (args[0]) {
-            case 'vote': {
+            case VOTE: {
                 lottery.addClient(message.author)
                 lottery.addVote(message.author, args[1])
                 break
             }
-            case 'dump': {
+            case DUMP: {
                 message.reply('```js ' + JSON.stringify(lottery.users) + ' ```')
                 console.log(lottery.users)
                 break
             }
 
-            case 'list': {
-                console.log(message)
+            case LIST: {
                 let output = '\n'
 
                 lottery.users.forEach(entry => {
-                    output += entry.user + ' - ' + entry.number + '\n'
+                    output += `Username: ${entry.user.username}, Number: ${entry.number} \n`
                 })
 
                 message.reply('```' + output + '```')

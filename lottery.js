@@ -32,7 +32,7 @@ module.exports = class Lottery {
             throw new AlreadyVotedError()
         }
 
-        let user = this._users.find(user => user.id === client.id)
+        let user = this._users.find(user => user.user.id === client.id)
         user.number = guessNumber
     }
 
