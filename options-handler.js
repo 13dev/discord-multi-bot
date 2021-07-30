@@ -25,13 +25,13 @@ module.exports = class OptionsHandler {
     }
 
     handleRange(min, max) {
-        if(min > max) {
+        if(parseInt(min) > parseInt(max)) {
             this.listener.reply('Minimum value is bigger than max value!')
             return
         }
 
-        this.lotteryInstance.minRange(min)
-        this.lotteryInstance.maxRange(max)
+        this.lotteryInstance.minRange = min
+        this.lotteryInstance.maxRange = max
 
         this.listener.reply(`Users can now vote between ${min} and ${max}!`)
     }
