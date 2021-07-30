@@ -6,6 +6,15 @@ class AlreadyVotedError extends Error {
     }
 }
 
+class LotteryCloseError extends Error {
+    constructor(props) {
+        super(props)
+        this.name = 'LotteryCloseError'
+        this.message = 'No lottery open, please try contact administrator.'
+    }
+
+}
+
 module.exports = {
     AlreadyVotedError,
 }

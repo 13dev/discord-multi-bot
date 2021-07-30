@@ -33,6 +33,11 @@ module.exports = class Lottery {
     }
 
     addVote(client, guessNumber) {
+
+        if(!this.status) {
+            throw new LotteryCloseError()
+        }
+
         if (this.isNumberVoted(guessNumber)) {
             throw new AlreadyVotedError()
         }
