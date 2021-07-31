@@ -1,8 +1,8 @@
 class AlreadyVotedError extends Error {
-    constructor() {
+    constructor(user) {
         super()
         this.name = 'AlreadyVotedError'
-        this.message = 'This number is already voted, choose another number!'
+        this.message = `This number is already voted by @${user.username}, choose another number!`
     }
 }
 

@@ -52,7 +52,9 @@ module.exports = class Lottery {
         }
 
         if (this.isNumberVoted(guessNumber)) {
-            throw new AlreadyVotedError()
+            throw new AlreadyVotedError(
+                this.users.find(user => guessNumber === user.number).user
+            )
         }
 
         if (guessNumber > this.range.max || guessNumber < this.range.min) {
