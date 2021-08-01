@@ -1,13 +1,13 @@
 module.exports = class OptionsHandler {
-    constructor(lotteryInstance, listener) {
-        this.lotteryInstance = lotteryInstance
+    constructor(lottery, listener) {
+        this.lottery = lottery
         this.listener = listener
     }
 
     handleList() {
         let output = '\n'
 
-        this.lotteryInstance.users.forEach(entry => {
+        this.lottery.users.forEach(entry => {
             output += `Username: ${entry.user.username}, Number: ${entry.number} \n`
         })
 
@@ -15,13 +15,14 @@ module.exports = class OptionsHandler {
     }
 
     handleDump() {
-        this.listener.reply('```js ' + JSON.stringify(this.lotteryInstance.users) + ' ```')
-        console.log(this.lotteryInstance.users)
+        this.listener.reply('```js ' + JSON.stringify(this.lottery.users) + ' ```')
+        console.log(this.lottery.users)
     }
 
     handleVote(number) {
-        this.lotteryInstance.addClient(this.listener.author)
-        this.lotteryInstance.addVote(this.listener.author, number)
+        this.lottery.addUser(this.listener.author)
+        this.lottery.bet(this.listener.author, number)
+        this.listener.reply('Vote added!')
     }
 
     handleRange(min, max) {
@@ -30,18 +31,18 @@ module.exports = class OptionsHandler {
             return
         }
 
-        this.lotteryInstance.minRange = min
-        this.lotteryInstance.maxRange = max
+        this.lottery.minRange = min
+        this.lottery.maxRange = max
 
         this.listener.reply(`Users can now vote between ${min} and ${max}!`)
     }
 
     handleStartLotery() {
-        if(this.lotteryInstance.status) {
+        if(this.lottery.status) {
             this.listener.reply(`Lottery is already open!`)
         }
 
-        this.lotteryInstance.startLottery()
+        this.lottery.start()
 
         this.listener.channel.send(`@everyone The lottery has begun, good luck!`)
     }

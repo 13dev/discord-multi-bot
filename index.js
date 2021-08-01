@@ -4,7 +4,7 @@ const client = new Discord.Client()
 
 const {TOKEN, CHANNEL, PREFIX} = process.env
 const {VOTE, LIST, DUMP, RANGE, START_LOTERY} = require('./options')
-const Lottery = require('./lottery')
+const Lottery = require('./models/lottery')
 const lottery = new Lottery()
 const OptionsHandler = require('./options-handler')
 

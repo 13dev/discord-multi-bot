@@ -1,37 +1,37 @@
 const {
-    LotteryCloseError,
+    LotteryClosedError,
     AlreadyVotedError,
-    NumberOutOfRangeError
-} = require('./errors')
+    BetOutOfRangeError
+} = require('../errors')
 
 module.exports = class Lottery {
     constructor() {
-        this._users = []
         this._status = false
-        this.range = {min: 1, max: 100}
+        this._dates = {start: null, end: null}
+        this._range = {min: 0, max: 0}
     }
 
-    get status() {
-        return this._status
+    set startDate(date) {
+        this._dates.start = date
     }
 
-    set status(value) {
-        this._status = value
+    set endDate(date) {
+        this._dates.end = date
     }
 
-    set minRange(range) {
-        this.range.min = range
+    set range(range) {
+        this._range = range
     }
 
-    set maxRange(range) {
-        this.range.max = range
+    get range() {
+        return this._range
     }
 
     get users() {
         return this._users
     }
 
-    addClient(client) {
+    addUser(client) {
         // user already exists
         if (this.users.find(user => user.user.id === client.id)) {
             return false
@@ -45,27 +45,27 @@ module.exports = class Lottery {
         return true
     }
 
-    addVote(client, guessNumber) {
+    bet(client, guessNumber) {
 
-        if (!this.status) {
-            throw new LotteryCloseError()
+        if (!this._status) {
+            throw new LotteryClosedError()
         }
 
-        if (this.isNumberVoted(guessNumber)) {
+        if (this.isBetTaken(guessNumber)) {
             throw new AlreadyVotedError(
                 this.users.find(user => guessNumber === user.number).user
             )
         }
 
         if (guessNumber > this.range.max || guessNumber < this.range.min) {
-            throw new NumberOutOfRangeError()
+            throw new BetOutOfRangeError()
         }
 
         let user = this.users.find(user => user.user.id === client.id)
         user.number = guessNumber
     }
 
-    startLottery() {
+    start() {
         this._status = true
     }
 
@@ -73,12 +73,12 @@ module.exports = class Lottery {
         // do stuff
     }
 
-    getNumbers() {
+    getBets() {
         return Object.values(this.users).map(user => user.number)
     }
 
-    isNumberVoted(number) {
-        return this.getNumbers().includes(number)
+    isBetTaken(number) {
+        return this.getBets().includes(number)
     }
 
 }
