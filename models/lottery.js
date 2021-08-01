@@ -4,6 +4,9 @@ const {
     BetOutOfRangeError
 } = require('../errors')
 
+const db = require('../database')
+const moment = require('moment')
+
 module.exports = class Lottery {
     constructor() {
         this._status = false
@@ -31,6 +34,13 @@ module.exports = class Lottery {
         return this._users
     }
 
+    create() {
+        const stmt = db.prepare('INSERT INTO lotteries (date_start, date_end, status, range_min, range_max) VALUES (?, ?, ?, ?, ?)');
+        const result = stmt.run(moment().unix(), this._dates.end, this._status, this.range.min, this.range.max);
+
+        return result.lastInsertRowid
+    }
+
     addUser(client) {
         // user already exists
         if (this.users.find(user => user.user.id === client.id)) {
@@ -45,24 +55,24 @@ module.exports = class Lottery {
         return true
     }
 
-    bet(client, guessNumber) {
+    bet(client, betNumber) {
 
         if (!this._status) {
             throw new LotteryClosedError()
         }
 
-        if (this.isBetTaken(guessNumber)) {
+        if (this.isBetTaken(betNumber)) {
             throw new AlreadyVotedError(
-                this.users.find(user => guessNumber === user.number).user
+                this.users.find(user => betNumber === user.number).user
             )
         }
 
-        if (guessNumber > this.range.max || guessNumber < this.range.min) {
+        if (betNumber > this.range.max || betNumber < this.range.min) {
             throw new BetOutOfRangeError()
         }
 
         let user = this.users.find(user => user.user.id === client.id)
-        user.number = guessNumber
+        user.number = betNumber
     }
 
     start() {
@@ -79,6 +89,12 @@ module.exports = class Lottery {
 
     isBetTaken(number) {
         return this.getBets().includes(number)
+    }
+
+    getCurrentLottery() {
+        return db
+            .prepare('SELECT * FROM lotteries ORDER BY id DESC LIMIT 1')
+            .get()
     }
 
 }
