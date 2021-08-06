@@ -4,9 +4,6 @@ const {
     BetOutOfRangeError
 } = require('../errors')
 
-const db = require('../database')
-const moment = require('moment')
-
 module.exports = class Lottery {
     constructor() {
         this._status = false
@@ -32,13 +29,6 @@ module.exports = class Lottery {
 
     get users() {
         return this._users
-    }
-
-    create() {
-        const stmt = db.prepare('INSERT INTO lotteries (date_start, date_end, status, range_min, range_max) VALUES (?, ?, ?, ?, ?)');
-        const result = stmt.run(moment().unix(), this._dates.end, this._status, this.range.min, this.range.max);
-
-        return result.lastInsertRowid
     }
 
     addUser(client) {
