@@ -26,7 +26,7 @@ module.exports = class OptionsHandler {
     }
 
     handleRange(min, max) {
-        if(parseInt(min) > parseInt(max)) {
+        if (parseInt(min) > parseInt(max)) {
             this.listener.reply('Minimum value is bigger than max value!')
             return
         }
@@ -38,7 +38,7 @@ module.exports = class OptionsHandler {
     }
 
     handleStartLotery() {
-        if(this.lottery.status) {
+        if (this.lottery.status) {
             this.listener.reply(`Lottery is already open!`)
         }
 

@@ -47,6 +47,9 @@ module.exports = class Lottery {
             return false
         }
 
+        const stmt = db.prepare('INSERT INTO lotteries (date_start, date_end, status, range_min, range_max) VALUES (?, ?, ?, ?, ?)');
+        const result = stmt.run(moment().unix(), this._dates.end, this._status, this.range.min, this.range.max);
+
         this._users.push({
             user: client,
             number: null,

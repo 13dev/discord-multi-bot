@@ -6,6 +6,8 @@ const {TOKEN, CHANNEL, PREFIX} = process.env
 const {VOTE, LIST, DUMP, RANGE, START_LOTERY} = require('./options')
 const Lottery = require('./models/lottery')
 const lottery = new Lottery()
+console.log(lottery.getCurrentLottery())
+
 const OptionsHandler = require('./options-handler')
 
 client.on('ready', () => {
