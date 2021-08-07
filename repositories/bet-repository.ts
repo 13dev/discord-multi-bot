@@ -1,4 +1,3 @@
-import Lottery from '@models/lottery'
 import database from '@src/database'
 import moment from 'moment'
 import Bet from '@models/bet'
@@ -9,6 +8,8 @@ interface BetRepositoryInterface {
     getAllByLotteryId(lotteryId: number): Array<Bet>
 
     getById(id: number): Bet
+
+    isBetTaken(betNumber: number): boolean
 }
 
 export default class BetRepository implements BetRepositoryInterface {
@@ -30,6 +31,14 @@ export default class BetRepository implements BetRepositoryInterface {
         return database
             .prepare('SELECT * FROM bets WHERE id = ?')
             .get(id)
+    }
+
+    isBetTaken(betNumber: number): boolean {
+        const result = database
+            .prepare('SELECT * FROM bets WHERE number = ?')
+            .all(betNumber)
+
+        return result.length > 0
     }
 
 }

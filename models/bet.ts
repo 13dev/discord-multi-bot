@@ -4,7 +4,8 @@ export default class Bet {
     constructor(private _id: number,
                 private _userId: number,
                 private _lotteryId: number,
-                private _createdAt: number) {
+                private _createdAt: number,
+                private _number: number) {
     }
 
     get id(): number {
@@ -39,4 +40,11 @@ export default class Bet {
         this._createdAt = value
     }
 
+    get number(): number {
+        return this._number
+    }
+
+    set number(value: number) {
+        this._number = value
+    }
 }

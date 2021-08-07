@@ -14,9 +14,9 @@ export default class Lottery {
     private _range: LotteryRangeInterface
 
     constructor(status: Boolean, dates: LotteryDatesInterface, range: LotteryRangeInterface) {
-        this._status = status;
-        this._dates = dates;
-        this._range = range;
+        this._status = status
+        this._dates = dates
+        this._range = range
     }
 
     public set dates(date: LotteryDatesInterface) {
@@ -40,6 +40,6 @@ export default class Lottery {
     }
 
     set status(value: Boolean) {
-        this._status = value;
+        this._status = value
     }
 }
