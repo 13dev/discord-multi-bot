@@ -43,5 +43,3 @@ export default class Lottery {
         this._status = value;
     }
 }
-
-//[{user: {}, number: 1}]

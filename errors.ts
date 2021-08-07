@@ -7,7 +7,7 @@ export class AlreadyVotedError extends Error {
 }
 
 export class LotteryClosedError extends Error {
-    constructor(props: string) {
+    constructor(props?: string) {
         super(props)
         this.name = 'LotteryCloseError'
         this.message = 'No lottery open, please try contact administrator.'
@@ -16,7 +16,7 @@ export class LotteryClosedError extends Error {
 }
 
 export class BetOutOfRangeError extends Error {
-    constructor(props: string) {
+    constructor(props?: string) {
         super(props)
         this.name = 'BetOutOfRangeError'
         this.message = 'Choose a number between x and x.'
