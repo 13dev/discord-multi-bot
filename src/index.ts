@@ -1,6 +1,7 @@
-import OptionsHandler, {Options} from '@src/options-handler'
+import OptionsHandler, {Options} from '@src/src/options-handler'
 import dotenv from 'dotenv'
 import {Client} from 'discord.js'
+import 'reflect-metadata'
 
 
 const client = new Client()
@@ -8,7 +9,6 @@ dotenv.config()
 const token: string = process.env.TOKEN || ''
 const channel: string = process.env.CHANNEL || 'lottery'
 const prefix: string = process.env.PREFIX || '-'
-
 
 
 client.on('ready', () => {

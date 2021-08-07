@@ -1,10 +1,10 @@
-import {AlreadyVotedError, BetOutOfRangeError, LotteryClosedError} from '@src/errors'
-import Lottery from '@models/lottery'
-import User from '@models/user'
-import {LotteryRepositoryInterface} from '@repositories/lottery-repository'
-import {BetRepositoryInterface} from '@repositories/bet-repository'
-import {UserRepositoryInterface} from '@repositories/user-repository'
-import Bet from '@models/bet'
+import {AlreadyVotedError, BetOutOfRangeError, LotteryClosedError} from '@src/src/errors'
+import Lottery from '@src/src/models/lottery'
+import User from '@src/src/models/user'
+import {LotteryRepositoryInterface} from '@src/src/repositories/lottery-repository'
+import {BetRepositoryInterface} from '@src/src/repositories/bet-repository'
+import {UserRepositoryInterface} from '@src/src/repositories/user-repository'
+import Bet from '@src/src/models/bet'
 import moment from 'moment'
 
 export default class LotteryService {

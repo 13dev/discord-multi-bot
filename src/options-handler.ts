@@ -1,6 +1,6 @@
 
 import {Message} from 'discord.js'
-import LotteryService from '@services/lottery-service'
+import LotteryService from '@src/src/services/lottery-service'
 
 export enum Options {
     LIST = 'list',

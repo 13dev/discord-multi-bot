@@ -1,5 +1,5 @@
-import User from '@models/user'
-import database from '@src/database'
+import User from '@src/src/models/user'
+import database from '@src/src/database'
 import moment from 'moment'
 
 export interface UserRepositoryInterface {
