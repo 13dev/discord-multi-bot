@@ -2,12 +2,12 @@
   "name": "lottery-discord",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "start": "npm run start:prod",
     "dev": "npm run start:dev",
     "tsc": "tsc",
-    "start:dev": "ts-node-dev --respawn --transpileOnly ./index.js",
+    "start:dev": "ts-node-dev --respawn --transpileOnly index.ts",
     "start:prod": "tsc && node ./dist/index.js",
     "build": "tsc"
   },

@@ -9,6 +9,7 @@ interface LotteryRangeInterface {
 }
 
 export default class Lottery {
+    private _id?: number
     private _status: Boolean = false
     private _dates: LotteryDatesInterface
     private _range: LotteryRangeInterface
@@ -17,6 +18,11 @@ export default class Lottery {
         this._status = status
         this._dates = dates
         this._range = range
+    }
+
+
+    get id(): number | undefined {
+        return this._id
     }
 
     public set dates(date: LotteryDatesInterface) {

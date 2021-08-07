@@ -1,8 +1,7 @@
 import database from '@src/database'
-import moment from 'moment'
 import Bet from '@models/bet'
 
-interface BetRepositoryInterface {
+export interface BetRepositoryInterface {
     create(bet: Bet): number
 
     getAllByLotteryId(lotteryId: number): Array<Bet>
@@ -10,6 +9,9 @@ interface BetRepositoryInterface {
     getById(id: number): Bet
 
     isBetTaken(betNumber: number): boolean
+
+    getByUserId(userId: number): Bet
+
 }
 
 export default class BetRepository implements BetRepositoryInterface {
@@ -22,7 +24,7 @@ export default class BetRepository implements BetRepositoryInterface {
     create(bet: Bet): number {
         const result = database
             .prepare('INSERT INTO bets (user_id, lottery_id, created_at) VALUES (?, ?, ?)')
-            .run(bet.userId, bet.lotteryId, moment().unix())
+            .run(bet.userId, bet.lotteryId, bet.createdAt)
 
         return result.lastInsertRowid as number
     }
@@ -39,6 +41,12 @@ export default class BetRepository implements BetRepositoryInterface {
             .all(betNumber)
 
         return result.length > 0
+    }
+
+    getByUserId(userId: number): Bet {
+        return database
+            .prepare('SELECT * FROM bets WHERE user_id = ?')
+            .get(userId)
     }
 
 }

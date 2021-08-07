@@ -1,19 +1,15 @@
 import database from '@src/database'
 const moment = require('moment')
 export default class Bet {
-    constructor(private _id: number,
-                private _userId: number,
+    private _id?: number
+    constructor(private _userId: number,
                 private _lotteryId: number,
                 private _createdAt: number,
                 private _number: number) {
     }
 
-    get id(): number {
+    get id(): number | undefined {
         return this._id
-    }
-
-    set id(value: number) {
-        this._id = value
     }
 
     get userId(): number {

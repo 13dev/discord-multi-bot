@@ -5,11 +5,13 @@ import moment from 'moment'
 export interface UserRepositoryInterface {
     create(user: User): number
 
+    getById(id: number): User
+
     all(): Array<User>
 }
 
 export default class UserRepository implements UserRepositoryInterface {
-    all(): Array<User> {
+    all(): User[] {
         return database
             .prepare('SELECT * FROM users')
             .all()
@@ -21,6 +23,12 @@ export default class UserRepository implements UserRepositoryInterface {
             .run(user.name, user.id)
 
         return result.lastInsertRowid as number
+    }
+
+    getById(id: number): User {
+        return database
+            .prepare('SELECT * FROM users WHERE id = ?')
+            .get(id)
     }
 
 }

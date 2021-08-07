@@ -1,7 +1,26 @@
-module.exports = class OptionsHandler {
-    constructor(lottery, listener) {
-        this.lottery = lottery
-        this.listener = listener
+
+import {Message} from 'discord.js'
+import LotteryService from '@services/lottery-service'
+
+export enum Options {
+    LIST = 'list',
+    DUMP = 'dump',
+    VOTE = 'vote',
+    RANGE = 'range',
+    START_LOTERY = 'start',
+}
+
+export default class OptionsHandler {
+    constructor(private _lottery: LotteryService,
+                private _listener: Message) {
+    }
+
+    get lottery(): LotteryService {
+        return this._lottery
+    }
+
+    get listener(): Message {
+        return this._listener
     }
 
     handleList() {
@@ -19,21 +38,18 @@ module.exports = class OptionsHandler {
         console.log(this.lottery.users)
     }
 
-    handleVote(number) {
-        this.lottery.addUser(this.listener.author)
-        this.lottery.bet(this.listener.author, number)
+    handleVote(number: number) {
+
         this.listener.reply('Vote added!')
     }
 
-    handleRange(min, max) {
-        if (parseInt(min) > parseInt(max)) {
+    handleRange(min: number, max: number) {
+        if (min > max) {
             this.listener.reply('Minimum value is bigger than max value!')
             return
         }
 
-        this.lottery.minRange = min
-        this.lottery.maxRange = max
-
+        this.lottery.range = {min, max}
         this.listener.reply(`Users can now vote between ${min} and ${max}!`)
     }
 

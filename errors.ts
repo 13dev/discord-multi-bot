@@ -1,8 +1,10 @@
+import User from '@models/user'
+
 export class AlreadyVotedError extends Error {
-    constructor(user: { username: string }) {
+    constructor(user: User) {
         super()
         this.name = 'AlreadyVotedError'
-        this.message = `This number is already voted by @${user.username}, choose another number!`
+        this.message = `This number is already voted by @${user.name}, choose another number!`
     }
 }
 
