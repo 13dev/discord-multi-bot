@@ -1,5 +1,5 @@
-import Lottery from '@src/src/models/lottery'
-import database from '@src/src/database'
+import Lottery from '@src/models/lottery'
+import database from '@src/database'
 import moment from 'moment'
 
 export interface LotteryRepositoryInterface {

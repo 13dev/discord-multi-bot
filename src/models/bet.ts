@@ -1,5 +1,7 @@
-import database from '@src/src/database'
+import database from '@src/database'
+
 const moment = require('moment')
+
 export default class Bet {
     private _id?: number
     constructor(private _userId: number,

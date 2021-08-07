@@ -1,5 +1,4 @@
 import color from 'colors'
-
 class ColorConsole {
     public static red(...str: string[]) {
         console.log(color.red(str.join(' ')))
