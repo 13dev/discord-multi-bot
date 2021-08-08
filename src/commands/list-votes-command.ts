@@ -4,7 +4,7 @@ import DiscordClient from '@src/discord-client'
 import BetService from '@services/bet-service'
 import {Inject, Service} from 'typedi'
 
-@Service()
+@Service('list-votes')
 export default class ListVotesCommand extends Command {
     @Inject()
     private betService!: BetService
