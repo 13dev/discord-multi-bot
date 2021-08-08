@@ -1,61 +1,56 @@
-import {ClientEvents} from 'discord.js'
-import Config from '@src/config'
-import events from '@events/index'
-import consolec from '@utils/color-console'
+import {Collection} from 'discord.js'
 import DiscordClient from '@src/discord-client'
+import {settings} from '@src/config'
+import {Command} from '@src/command'
+import {Logger} from '@utils/logger'
+import {BotEvent} from '@src/events'
+import events from '@events/index'
+import commands from '@commands/index'
+import {Container} from 'typedi'
 
 class DiscordLoader {
 
     public static async load() {
-        consolec.gray('[DISCORD] Initing Bot');
+        Logger.info('Initing bot!')
+        console.log(events)
+        console.log(commands)
 
-        const client = new DiscordClient();
-        type eventKeys = keyof ClientEvents;
-
-ClientEvents
-
-        client.setConfig(Config.discord);
-        DiscordClient.setInstance(client);
-
-        await client.login(Config.discord.token);
-
-        // Add Discord Event Handlers
-        // @ts-ignore
-        await Object.keys(events).forEach((e: eventKeys) => {
-            consolec.gray(`[DISCORD] Adding Event: ${e}`);
-            // @ts-ignore
-            let functions = Object.values(events[e])
+        const client = Container.get<DiscordClient>(DiscordClient)
 
 
+        client.setConfig(settings)
+        DiscordClient.setInstance(client)
 
-            functions.forEach(a => {
-                console.log(e)
-                // @ts-ignore
-                client.on(e, a)
-            })
-        });
+        this.initializeCommands(client)
+        this.initializeEvents(client)
+
+        await client.login(settings.token)
+
     }
 
-    // public static async load() {
-    //     consolec.gray('[DISCORD] Initing Bot')
-    //
-    //     const client = new DiscordClient()
-    //     let allEvents = Object.keys(events) as Array<keyof ClientEvents>
-    //     allEvents.forEach((value: keyof ClientEvents) => {
-    //         consolec.gray(`[DISCORD] Adding Event: ${value}`)
-    //         // @ts-ignore
-    //         let functions = Object.values(events[value])
-    //         // @ts-ignore
-    //         functions.forEach(a => client.on(value, a))
-    //         // @ts-ignore
-    //         //client.on(value, events[value])
-    //     })
-    //
-    //     client.setConfig(Config.discord)
-    //     DiscordClient.setInstance(client)
-    //
-    //     await client.login(Config.discord.token)
-    // }
+    public static initializeCommands(client: DiscordClient): void {
+
+        commands.forEach(command => {
+
+            const Command = new command(client) as Command
+            Logger.info('Command loaded', command)
+            client.commands.set(Command.commandOptions.name, Command)
+
+        })
+    }
+
+    public static initializeEvents(client: DiscordClient): void {
+        events.forEach(event => {
+            // @ts-ignore
+            const Event = new event(client)
+
+            console.log(Event)
+            Logger.info('Event loaded', event)
+
+            client.on(Event.type.toString(), (...args: string[]) => Event.run(args))
+        })
+    }
+
 }
 
 export default DiscordLoader

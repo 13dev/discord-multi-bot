@@ -25,11 +25,14 @@
     "moment": "^2.29.1",
     "reflect-metadata": "^0.1.13",
     "ts-node-esm": "0.0.6",
-    "typeorm": "^0.2.36"
+    "typedi": "^0.10.0",
+    "typeorm": "^0.2.36",
+    "winston": "^3.3.3"
   },
   "_moduleAliases": {
     "@modules": "build/models",
     "@services": "build/services",
+    "@commands": "build/commands",
     "@repositories": "@build/repositories",
     "@src": "build",
     "@utils": "build/utils",

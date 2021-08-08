@@ -66,17 +66,19 @@
 //
 // client.login(TOKEN)
 import 'module-alias/register'
+import 'reflect-metadata'
+
 import Loaders from '@loaders/index'
-import consolec from '@utils/color-console'
+import {Logger} from '@utils/logger'
 
 let loaders = Object.keys(Loaders) as Array<keyof typeof Loaders>
 
 loaders.forEach(key => {
     if (typeof Loaders[key].load !== 'function') {
-        consolec.yellow(`[LOADER] ${key}: Failed to call load function`)
+        Logger.error(`[LOADER] ${key}: Failed to call load function`)
         return null
     }
 
-    consolec.gray(`[LOADER] ${key}: Loading...`)
+    Logger.info(`[LOADER] ${key}: Loading...`)
     Loaders[key].load()
 })
