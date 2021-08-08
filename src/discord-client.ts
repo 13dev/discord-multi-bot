@@ -1,17 +1,21 @@
-import Discord from 'discord.js'
+import Discord, {Client, ClientOptions, Collection, PresenceData} from 'discord.js'
+import {Command} from '@src/command'
 
-interface DiscordConfig {
-    token: string,
-    serverId: string,
-    warnChannelId: string,
-    statusMessage: string,
-    commandPrefix: string,
+export interface BotSettings {
+    presence: PresenceData
+    clientOptions?: ClientOptions
+    token?: string
+    prefix: string
+    paths: {
+        commands: string
+        events: string
+    };
 }
 
 class DiscordClient extends Discord.Client {
     private static instance: DiscordClient
-
-    public config!: DiscordConfig
+    commands!: Collection<string, Command>
+    public config!: BotSettings
 
     public static getInstance(): DiscordClient {
         if (!DiscordClient.instance) {
@@ -25,7 +29,7 @@ class DiscordClient extends Discord.Client {
         DiscordClient.instance = Client
     }
 
-    public setConfig(Config: DiscordConfig): DiscordClient {
+    public setConfig(Config: BotSettings): DiscordClient {
         this.config = Config
         return DiscordClient.instance
     }
