@@ -44,7 +44,6 @@ class DiscordLoader {
             // @ts-ignore
             const Event = new event(client)
 
-            console.log(Event)
             Logger.info('Event loaded', event)
 
             client.on(Event.type.toString(), (...args: string[]) => Event.run(args))
