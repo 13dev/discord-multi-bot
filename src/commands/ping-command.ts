@@ -9,7 +9,6 @@ export default class PingCommand extends Command {
         super(client, {
             description: 'Pings the bot.',
             category: 'Information',
-            cooldown: 1000,
             requiredPermissions: [],
         })
     }

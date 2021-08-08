@@ -13,7 +13,6 @@ export default class ListVotesCommand extends Command {
         super(client, {
             description: 'List all votes.',
             category: 'Information',
-            cooldown: 1000,
             requiredPermissions: [],
         })
     }
