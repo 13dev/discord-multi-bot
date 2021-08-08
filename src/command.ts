@@ -12,12 +12,10 @@ import DiscordClient from '@src/discord-client'
 import {Inject} from 'typedi'
 
 export interface CommandOptions {
-    name: string;
-    description?: string;
-    usage?: string;
-    category?: string;
-    cooldown: number;
-    requiredPermissions: PermissionString[];
+    description?: string
+    category?: string
+    cooldown: number
+    requiredPermissions: PermissionString[]
 }
 
 export interface UserCooldown {
@@ -32,11 +30,9 @@ export abstract class Command {
     public commandOptions: CommandOptions
     public cooldowns: Set<UserCooldown>
 
-    constructor(@Inject() protected client: DiscordClient, options: CommandOptions) {
+    protected constructor(@Inject() protected client: DiscordClient, options: CommandOptions) {
         this.commandOptions = {
-            name: options.name,
             description: options.description || 'No information specified.',
-            usage: options.usage || 'No usage specified.',
             category: options.category || 'Information',
             cooldown: options.cooldown || 1000,
             requiredPermissions: options.requiredPermissions || ['READ_MESSAGES'],
@@ -80,5 +76,5 @@ export abstract class Command {
         return this
     }
 
-    public abstract run(message: Message, args: string[]): Promise<void>;
+    public abstract run(message: Message, args: string[]): Promise<void>
 }

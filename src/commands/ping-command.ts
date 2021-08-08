@@ -1,16 +1,14 @@
 import {Message} from 'discord.js'
 import {Command} from '@src/command'
 import DiscordClient from '@src/discord-client'
-import {Container, Service} from 'typedi'
+import {Service} from 'typedi'
 
 @Service('ping')
 export default class PingCommand extends Command {
     constructor(client: DiscordClient) {
         super(client, {
-            name: 'ping',
             description: 'Pings the bot.',
             category: 'Information',
-            usage: client.config.prefix.concat('ping'),
             cooldown: 1000,
             requiredPermissions: [],
         })

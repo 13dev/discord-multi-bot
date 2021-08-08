@@ -11,10 +11,8 @@ export default class ListVotesCommand extends Command {
 
     constructor(client: DiscordClient) {
         super(client, {
-            name: 'list-votes',
             description: 'List all votes.',
             category: 'Information',
-            usage: client.config.prefix.concat('list'),
             cooldown: 1000,
             requiredPermissions: [],
         })
