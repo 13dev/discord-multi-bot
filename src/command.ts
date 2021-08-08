@@ -9,6 +9,7 @@ import {
     MessageEmbed,
 } from 'discord.js'
 import DiscordClient from '@src/discord-client'
+import {Inject} from 'typedi'
 
 export interface CommandOptions {
     name: string;
@@ -31,7 +32,7 @@ export abstract class Command {
     public commandOptions: CommandOptions
     public cooldowns: Set<UserCooldown>
 
-    constructor(protected client: DiscordClient, options: CommandOptions) {
+    constructor(@Inject() protected client: DiscordClient, options: CommandOptions) {
         this.commandOptions = {
             name: options.name,
             description: options.description || 'No information specified.',
