@@ -1,9 +1,7 @@
 import {BotEvent, EventType} from '@events/index'
 import DiscordClient from '@src/discord-client'
 import {Command} from '@src/command'
-import {ServiceNotFoundError} from 'typedi'
 import {Container} from 'typeorm-typedi-extensions'
-import PingCommand from '@commands/ping-command'
 import CommandResolver from '@src/resolver/command-resolver'
 
 export default class OnReadyEvent implements BotEvent {
@@ -35,7 +33,6 @@ export default class OnReadyEvent implements BotEvent {
         await cmd.run(message, argus)
 
         if (message.guild) cmd.setCooldown(message.author, message.guild)
-
 
     }
 }
