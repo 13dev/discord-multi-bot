@@ -55,9 +55,7 @@ export abstract class Command {
             : false
 
         if (!hasPermission || onCooldown) {
-            message.channel.send(
-                'You do not have permission for this command or you are on cooldown.',
-            )
+            message.channel.send('You do not have permission for this command or you are on cooldown.')
             return false
         }
 
