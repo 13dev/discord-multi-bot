@@ -1,4 +1,4 @@
-import User from '@models/user'
+import User from '@src/models/user'
 
 export class AlreadyVotedError extends Error {
     constructor(user: User) {

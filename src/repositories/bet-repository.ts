@@ -1,5 +1,5 @@
 import database from '@src/database'
-import Bet from '@models/bet'
+import Bet from '@src/models/bet'
 
 export interface BetRepositoryInterface {
     create(bet: Bet): number
