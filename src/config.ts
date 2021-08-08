@@ -8,8 +8,8 @@ export const settings: BotSettings = {
     presence: {
         activity: {
             name: '!help for commands',
-            type: 'PLAYING'
-        }
+            type: 'PLAYING',
+        },
     },
     prefix: process.env.PREFIX || '-',
     token: process.env.TOKEN || '',
@@ -18,4 +18,8 @@ export const settings: BotSettings = {
 export const database: SqliteConnectionOptions = {
     database: 'database1.db',
     type: 'sqlite',
+    entities: [
+        __dirname + '/models/*.{js,ts}',
+    ],
+    synchronize: true,
 }

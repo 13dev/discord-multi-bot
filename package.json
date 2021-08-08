@@ -38,7 +38,8 @@
     "@src": "build",
     "@utils": "build/utils",
     "@loaders": "build/loaders",
-    "@events": "build/events"
+    "@events": "build/events",
+    "@models": "build/models"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.36",

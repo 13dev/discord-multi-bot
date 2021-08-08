@@ -1,51 +1,26 @@
-interface LotteryDatesInterface {
-    start: Number
-    end: Number
-}
+import {Entity, PrimaryGeneratedColumn, Column, OneToMany} from 'typeorm'
+import Bet from '@models/bet'
 
-interface LotteryRangeInterface {
-    min: Number
-    max: Number
-}
-
+@Entity()
 export default class Lottery {
-    private _id?: number
-    private _status: Boolean = false
-    private _dates: LotteryDatesInterface
-    private _range: LotteryRangeInterface
+    @PrimaryGeneratedColumn()
+    id!: number
 
-    constructor(status: Boolean, dates: LotteryDatesInterface, range: LotteryRangeInterface) {
-        this._status = status
-        this._dates = dates
-        this._range = range
-    }
+    @Column({nullable: false})
+    status!: boolean
 
+    @Column({nullable: false, name: 'date_begin'})
+    dateBegin!: number
 
-    get id(): number | undefined {
-        return this._id
-    }
+    @Column({nullable: false, name: 'date_end'})
+    dateEnd!: number
 
-    public set dates(date: LotteryDatesInterface) {
-        this._dates = date
-    }
+    @Column({nullable: false, name: 'range_min'})
+    rangeMin!: number
 
-    public set range(range: LotteryRangeInterface) {
-        this._range = range
-    }
+    @Column({nullable: false, name: 'range_max'})
+    rangeMax!: number
 
-    public get status(): Boolean {
-        return this._status
-    }
-
-    public get dates(): LotteryDatesInterface {
-        return this._dates
-    }
-
-    public get range(): LotteryRangeInterface {
-        return this._range
-    }
-
-    set status(value: Boolean) {
-        this._status = value
-    }
+    @OneToMany(() => Bet, bet => bet.lottery)
+    bets!: Bet[];
 }

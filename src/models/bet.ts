@@ -1,48 +1,25 @@
-import database from '@src/database'
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from 'typeorm'
+import Lottery from '@models/lottery'
+import User from '@models/user'
 
 const moment = require('moment')
 
+@Entity()
 export default class Bet {
-    private _id?: number
-    constructor(private _userId: number,
-                private _lotteryId: number,
-                private _createdAt: number,
-                private _number: number) {
-    }
+    @PrimaryGeneratedColumn()
+    id!: number
 
-    get id(): number | undefined {
-        return this._id
-    }
+    @Column({nullable: false, name: 'created_at'})
+    createdAt!: number
 
-    get userId(): number {
-        return this._userId
-    }
+    @Column({nullable: false})
+    number!: number
 
-    set userId(value: number) {
-        this._userId = value
-    }
+    @ManyToOne(() => Lottery, lottery => lottery.bets)
+    @JoinColumn({name: 'lottery_id'})
+    lottery!: Lottery
 
-    get lotteryId(): number {
-        return this._lotteryId
-    }
-
-    set lotteryId(value: number) {
-        this._lotteryId = value
-    }
-
-    get createdAt(): number {
-        return this._createdAt
-    }
-
-    set createdAt(value: number) {
-        this._createdAt = value
-    }
-
-    get number(): number {
-        return this._number
-    }
-
-    set number(value: number) {
-        this._number = value
-    }
+    @ManyToOne(() => User, lottery => lottery.bets)
+    @JoinColumn({name: 'user_id'})
+    user!: User
 }
