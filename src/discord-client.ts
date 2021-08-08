@@ -1,6 +1,6 @@
 import Discord, {Client, ClientOptions, Collection, PresenceData} from 'discord.js'
 import {Command} from '@src/command'
-
+import { Service } from 'typedi'
 export interface BotSettings {
     presence: PresenceData
     clientOptions?: ClientOptions
@@ -11,11 +11,15 @@ export interface BotSettings {
         events: string
     };
 }
-
+@Service()
 class DiscordClient extends Discord.Client {
     private static instance: DiscordClient
-    commands!: Collection<string, Command>
+    private _commands: Collection<string, Command> = new Collection<string, Command>()
     public config!: BotSettings
+
+    public get commands(): Collection<string, Command> {
+        return this._commands
+    }
 
     public static getInstance(): DiscordClient {
         if (!DiscordClient.instance) {

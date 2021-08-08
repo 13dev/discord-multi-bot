@@ -25,6 +25,7 @@
     "moment": "^2.29.1",
     "reflect-metadata": "^0.1.13",
     "ts-node-esm": "0.0.6",
+    "typedi": "^0.10.0",
     "typeorm": "^0.2.36",
     "winston": "^3.3.3"
   },

@@ -2,7 +2,7 @@ import {Message} from 'discord.js'
 import {Command} from '@src/command'
 import DiscordClient from '@src/discord-client'
 
-export default class Ping extends Command {
+export default class PingCommand extends Command {
     constructor(client: DiscordClient) {
         super(client, {
             name: 'ping',
@@ -10,7 +10,7 @@ export default class Ping extends Command {
             category: 'Information',
             usage: client.config.prefix.concat('ping'),
             cooldown: 1000,
-            requiredPermissions: ['SEND_MESSAGES'],
+            requiredPermissions: [],
         })
     }
 

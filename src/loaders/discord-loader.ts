@@ -6,16 +6,17 @@ import {Logger} from '@utils/logger'
 import {BotEvent} from '@src/events'
 import events from '@events/index'
 import commands from '@commands/index'
+import {Container} from 'typedi'
 
 class DiscordLoader {
-    public static _commands: Collection<string, Command> = new Collection<string, Command>()
 
     public static async load() {
         Logger.info('Initing bot!')
         console.log(events)
         console.log(commands)
 
-        const client = new DiscordClient()
+        const client = Container.get<DiscordClient>(DiscordClient)
+
 
         client.setConfig(settings)
         DiscordClient.setInstance(client)
@@ -27,26 +28,24 @@ class DiscordLoader {
 
     }
 
-    public static get commands(): Collection<string, Command> {
-        return this._commands
-    }
-
     public static initializeCommands(client: DiscordClient): void {
 
         commands.forEach(command => {
 
             const Command = new command(client) as Command
-
-            this.commands.set(Command.commandOptions.name, Command)
+            Logger.info('Command loaded', command)
+            client.commands.set(Command.commandOptions.name, Command)
 
         })
     }
 
     public static initializeEvents(client: DiscordClient): void {
-
         events.forEach(event => {
             // @ts-ignore
-            const Event: BotEvent = new event(client) as BotEvent
+            const Event = new event(client)
+
+            console.log(Event)
+            Logger.info('Event loaded', event)
 
             client.on(Event.type.toString(), (...args: string[]) => Event.run(args))
         })

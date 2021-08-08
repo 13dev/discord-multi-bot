@@ -66,6 +66,7 @@
 //
 // client.login(TOKEN)
 import 'module-alias/register'
+import 'reflect-metadata'
 
 import Loaders from '@loaders/index'
 import consolec from '@utils/color-console'
