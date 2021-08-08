@@ -2,38 +2,46 @@ import {AlreadyVotedError, BetOutOfRangeError, LotteryClosedError} from '@src/er
 import Lottery from '@src/models/lottery'
 import User from '@src/models/user'
 import Bet from '@src/models/bet'
-import moment from 'moment'
+import {BetRepository} from '@repositories/bet-repository'
+import {InjectRepository} from 'typeorm-typedi-extensions'
+import {Inject} from 'typedi'
+import {LOTTERY} from '@utils/consts'
 
 export default class LotteryService {
 
-    constructor(
-        private lottery: Lottery) {
+    @Inject(LOTTERY)
+    private _lottery?: Lottery
+
+    constructor(@InjectRepository(Bet) private betRepository: BetRepository) {
     }
 
-    create(lottery: Lottery) {
-        return
+
+    get lottery(): Lottery {
+        if(this._lottery === undefined) {
+            this._lottery = new Lottery()
+        }
+        return this.lottery
     }
 
-    bet(user: User, betNumber: number) {
+    public async bet(user: User, betNumber: number): Promise<void> {
 
         if (!this.lottery.status) {
             throw new LotteryClosedError
         }
 
-        // if (this.betRepository.isBetTaken(betNumber)) {
-        //     const bet = this.betRepository.getByUserId(user.id)
-        //     throw new AlreadyVotedError(
-        //         this.userRepository.getById(bet.userId)
-        //     )
-        // }
-        //
-        // if (betNumber > this.lottery.range.max || betNumber < this.lottery.range.min) {
-        //     throw new BetOutOfRangeError
-        // }
-        //
-        // this.betRepository.create(
-        //     new Bet(user.id, this.lottery.id as number, moment().unix(), betNumber)
-        // )
+        if (await this.betRepository.isBetTaken(betNumber)) {
+            throw new AlreadyVotedError(
+
+            )
+        }
+
+        if (betNumber > this.lottery.range.max || betNumber < this.lottery.range.min) {
+            throw new BetOutOfRangeError
+        }
+
+        this.betRepository.create(
+            new Bet(user.id, this.lottery.id as number, moment().unix(), betNumber)
+        )
     }
 
 }

@@ -21,18 +21,14 @@ export default class OnReadyEvent implements BotEvent {
         const commandClass: typeof Command | undefined = CommandResolver.resolve(command)
 
         if (commandClass === undefined) {
-            message.reply('Command not found!')
             return
         }
 
         const cmd: Command = await Container.get(commandClass)
 
-        if (!cmd) return
         if (!cmd.canRun(message.author, message)) return
 
         await cmd.run(message, argus)
-
-        if (message.guild) cmd.setCooldown(message.author, message.guild)
 
     }
 }

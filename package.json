@@ -35,7 +35,7 @@
     "@modules": "build/models",
     "@services": "build/services",
     "@commands": "build/commands",
-    "@repositories": "@build/repositories",
+    "@repositories": "build/repositories",
     "@src": "build",
     "@utils": "build/utils",
     "@loaders": "build/loaders",

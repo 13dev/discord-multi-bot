@@ -4,25 +4,22 @@ import DiscordClient from '@src/discord-client'
 import BetService from '@services/bet-service'
 import {Inject, Service} from 'typedi'
 
-@Service('list-votes')
+@Service()
 export default class ListVotesCommand extends Command {
     @Inject()
     private betService!: BetService
 
     constructor(client: DiscordClient) {
         super(client, {
-            name: 'list-votes',
             description: 'List all votes.',
             category: 'Information',
-            usage: client.config.prefix.concat('list'),
-            cooldown: 1000,
             requiredPermissions: [],
         })
     }
 
     public async run(message: Message): Promise<void> {
 
-        let output = '';
+        let output = ''
 
         await this.betService.getBets().then(bets => {
             bets.forEach(bet => {
@@ -30,7 +27,7 @@ export default class ListVotesCommand extends Command {
             })
         })
 
-        await super.respond(message.channel,'```' + output + '```')
+        await super.respond(message.channel, '```' + output + '```')
 
     }
 }
