@@ -12,7 +12,6 @@ export default class BetService {
     @InjectRepository(Bet)
     private betRepository!: Repository<Bet>
 
-
     public async getBetsByLotteryId(lotteryId: number): Promise<Bet[]> {
         return this.betRepository.find({
             where: {

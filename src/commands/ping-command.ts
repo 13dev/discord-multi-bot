@@ -1,9 +1,13 @@
 import {Message} from 'discord.js'
 import {Command} from '@src/command'
 import DiscordClient from '@src/discord-client'
-import {Service} from 'typedi'
+import {Container, Service, Token} from 'typedi'
+import {getCustomRepository} from 'typeorm'
+import {LotteryRepository} from '@repositories/lottery-repository'
+import Lottery from '@models/lottery'
+import {Logger} from '@utils/logger'
 
-@Service('ping')
+@Service()
 export default class PingCommand extends Command {
     constructor(client: DiscordClient) {
         super(client, {
@@ -14,6 +18,6 @@ export default class PingCommand extends Command {
     }
 
     public async run(message: Message): Promise<void> {
-        await super.respond(message.channel, 'Pong!')
+        await super.respond(message.channel, 'Pong!' + Container.get('lottery-id'))
     }
 }

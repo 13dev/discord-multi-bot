@@ -30,7 +30,5 @@ export default class OnReadyEvent implements BotEvent {
 
         await cmd.run(message, argus)
 
-        if (message.guild) cmd.setCooldown(message.author, message.guild)
-
     }
 }

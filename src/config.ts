@@ -22,4 +22,6 @@ export const database: SqliteConnectionOptions = {
         __dirname + '/models/*.{js,ts}',
     ],
     synchronize: true,
+    logging: true,
+
 }
