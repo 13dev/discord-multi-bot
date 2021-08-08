@@ -1,28 +1,13 @@
-import {createConnection, ConnectionOptions} from 'typeorm'
+import {createConnection, ConnectionOptions, Connection} from 'typeorm'
 import {database} from '@src/config'
 import {Logger} from '@utils/logger'
-import User from '@models/user'
+import {Service} from 'typedi'
 
-
-class TypeOrmLoader {
-    public static async load() {
-        const options = database as ConnectionOptions
-
-        console.log(options.entities)
-        await createConnection(options).then(connection => {
-            let photo = new User()
-            photo.name = 'Me and Bears'
-
-            return connection.manager
-                .save(photo)
-                .then(photo => {
-                    console.log('Photo has been saved. Photo id is', photo.id)
-                })
-        })
-
-
-        Logger.info('TypeORM Created Connection!')
+@Service()
+export default class TypeOrmLoader {
+    constructor() {
+        createConnection(database as ConnectionOptions)
+            .then(() => Logger.info('TypeORM Created Connection!'))
+            .catch(console.log)
     }
 }
-
-export default TypeOrmLoader

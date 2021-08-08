@@ -1,10 +1,11 @@
 import {BotEvent, EventType} from '@events/index'
 import DiscordClient from '@src/discord-client'
+import {Container, Inject} from 'typedi'
 
 export default class OnReadyEvent implements BotEvent {
     type: EventType = EventType.MESSAGE
 
-    constructor(private client: DiscordClient) {
+    constructor(@Inject() private client: DiscordClient) {
     }
 
     public async run(args: any): Promise<void> {
@@ -14,8 +15,7 @@ export default class OnReadyEvent implements BotEvent {
 
         const argus = message.content.split(/\s+/g)
         const command = argus.shift()!.slice(this.client.config.prefix.length)
-        console.log(this.client.commands)
-        const cmd = this.client.commands.get(command)
+        const cmd = Container.get<typeof command>(command)
 
         if (!cmd) return
         if (!cmd.canRun(message.author, message)) return
