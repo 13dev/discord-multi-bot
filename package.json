@@ -24,6 +24,7 @@
     "module-alias": "^2.2.2",
     "moment": "^2.29.1",
     "reflect-metadata": "^0.1.13",
+    "sqlite3": "^5.0.2",
     "ts-node-esm": "0.0.6",
     "typedi": "^0.10.0",
     "typeorm": "^0.2.36",
@@ -37,7 +38,8 @@
     "@src": "build",
     "@utils": "build/utils",
     "@loaders": "build/loaders",
-    "@events": "build/events"
+    "@events": "build/events",
+    "@models": "build/models"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.36",

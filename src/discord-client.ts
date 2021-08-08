@@ -6,10 +6,6 @@ export interface BotSettings {
     clientOptions?: ClientOptions
     token?: string
     prefix: string
-    paths: {
-        commands: string
-        events: string
-    };
 }
 @Service()
 class DiscordClient extends Discord.Client {

@@ -1,4 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column} from 'typeorm'
+import {Entity, PrimaryGeneratedColumn, Column, OneToMany} from 'typeorm'
+import Bet from '@models/bet'
 
 @Entity()
 export default class User {
@@ -7,4 +8,7 @@ export default class User {
 
     @Column()
     name!: string
+
+    @OneToMany(() => Bet, bet => bet.user)
+    bets!: Bet[]
 }
