@@ -1,6 +1,6 @@
-import {getConnection, getCustomRepository} from 'typeorm'
+import {getCustomRepository} from 'typeorm'
 import {Logger} from '@utils/logger'
-import {Container as c, Container, Service, Token} from 'typedi'
+import {Container, Service, Token} from 'typedi'
 import {LotteryRepository} from '@repositories/lottery-repository'
 import Lottery from '@models/lottery'
 import {LOTTERY} from '@utils/consts'
