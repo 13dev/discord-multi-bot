@@ -2,7 +2,7 @@ import {Message} from 'discord.js'
 import {Command} from '@src/command'
 import DiscordClient from '@src/discord-client'
 import {Container, Service} from 'typedi'
-import {LOTTERY} from '@utils/consts'
+import {LOTTERY_ID} from '@utils/consts'
 
 @Service()
 export default class PingCommand extends Command {
@@ -16,6 +16,6 @@ export default class PingCommand extends Command {
     }
 
     public async run(message: Message): Promise<void> {
-        await super.respond(message.channel, 'Pong! ' + JSON.stringify(Container.get(LOTTERY)))
+        await super.respond(message.channel, 'Pong! ' + JSON.stringify(Container.get(LOTTERY_ID)))
     }
 }

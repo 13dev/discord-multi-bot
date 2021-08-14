@@ -30,7 +30,7 @@ export abstract class Command {
         }
     }
 
-    public canRun(user: User, message: Message): boolean {
+    public async canRun(user: User, message: Message): Promise<boolean> {
         if (!message.member) {
             return false
         }
@@ -41,7 +41,7 @@ export abstract class Command {
         })
 
         if (!hasPermission) {
-            message.channel.send('You do not have permission for this command.')
+            await message.channel.send('You do not have permission for this command.')
             return false
         }
 

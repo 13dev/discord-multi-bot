@@ -3,7 +3,7 @@ import {Logger} from '@utils/logger'
 import {Container, Service, Token} from 'typedi'
 import {LotteryRepository} from '@repositories/lottery-repository'
 import Lottery from '@models/lottery'
-import {LOTTERY} from '@utils/consts'
+import {LOTTERY_ID} from '@utils/consts'
 import moment from 'moment'
 
 @Service()
@@ -25,7 +25,7 @@ export default class LotteryLoader {
                 }
 
                 Logger.info('Setting the lottery id to: ' + lottery.id.toString())
-                Container.set(LOTTERY, lottery)
+                Container.set<Token<number>>(LOTTERY_ID, lottery.id)
             })
             .catch(console.log)
 

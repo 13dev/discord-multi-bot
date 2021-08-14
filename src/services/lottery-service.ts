@@ -11,15 +11,17 @@ import Bet from '@src/models/bet'
 import {BetRepository} from '@repositories/bet-repository'
 import {InjectRepository} from 'typeorm-typedi-extensions'
 import {Inject, Service} from 'typedi'
-import {LOTTERY, USER} from '@utils/consts'
+import {LOTTERY_ID, USER} from '@utils/consts'
 import BetService from '@services/bet-service'
 import {Logger} from '@utils/logger'
+import {getCustomRepository} from 'typeorm'
+import {LotteryRepository} from '@repositories/lottery-repository'
 
 @Service()
 export default class LotteryService {
 
-    @Inject(LOTTERY)
-    private _lottery?: Lottery
+    @Inject(LOTTERY_ID)
+    private _lottery!: number
 
     @Inject(USER)
     private _user?: User
@@ -30,11 +32,14 @@ export default class LotteryService {
     }
 
 
-    get lottery(): Lottery {
+    private async lottery(): Promise<Lottery> {
+
         if (this._lottery === undefined) {
             throw new LotteryNotFoundError()
         }
-        return this._lottery
+
+        return await getCustomRepository(LotteryRepository).findOneOrFail(this._lottery)
+
     }
 
     get user(): User {
@@ -44,25 +49,44 @@ export default class LotteryService {
         return this._user
     }
 
-    public async bet(betNumber: number): Promise<void> {
+    public async bet(betNumber: number): Promise<Bet> {
 
         Logger.info(`Calling lotteryService: ${JSON.stringify(this.user)}, betnumber: ${betNumber}`)
 
-        if (!this.lottery.status) {
+        const lottery = await this.lottery()
+
+        if (!lottery.status) {
             throw new LotteryClosedError
         }
 
-        let betTaken = await this.betRepository.isBetTaken(betNumber)
+        let bet = await this.betRepository.getBetByNumberAndLottery(betNumber, lottery.id)
 
-        if (betTaken !== undefined) {
-            throw new AlreadyVotedError(betTaken.user)
+        if (bet) {
+            throw new AlreadyVotedError(bet.user)
         }
 
-        if (betNumber > this.lottery.rangeMax || betNumber < this.lottery.rangeMin) {
+        if (betNumber > lottery.rangeMax || betNumber < lottery.rangeMin) {
             throw new BetOutOfRangeError()
         }
 
-        await this.betService.createBet(betNumber, this.lottery, this.user)
+        let existingBet = await this.betRepository.findOne({
+            where: {
+                lottery: lottery,
+                user: this.user,
+            },
+        })
+
+        // Update bet
+        if (existingBet) {
+            existingBet.number = betNumber
+            await this.betRepository.update({id: existingBet.id}, existingBet)
+
+            return existingBet
+        }
+
+
+        return await this.betService.createBet(betNumber, lottery, this.user)
+
     }
 
 }

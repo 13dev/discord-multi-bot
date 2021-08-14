@@ -1,10 +1,10 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from 'typeorm'
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index} from 'typeorm'
 import Lottery from '@models/lottery'
 import User from '@models/user'
 
-const moment = require('moment')
 
 @Entity()
+@Index(['lottery', 'user'], { unique: true })
 export default class Bet {
     @PrimaryGeneratedColumn()
     id!: number

@@ -16,7 +16,7 @@ export default class BetService {
             where: {
                 lottery: {id: lotteryId},
             },
-            relations: ['lottery'],
+            relations: ['lottery', 'user'],
         })
     }
 
@@ -35,19 +35,13 @@ export default class BetService {
 
     public async createBet(number: number, lottery: Lottery, user: User): Promise<Bet> {
 
-        return await getConnection().transaction(async manager => {
-            let bet = new Bet()
-            bet.createdAt = moment().unix()
-            bet.number = number
-            bet.lottery = lottery
-            bet.user = user
+        const betRepository = getCustomRepository(BetRepository)
 
-            const betRepository = manager.getCustomRepository(BetRepository)
-            const userRepository = manager.getCustomRepository(UserRepository)
-            const lotteryRepository = manager.getCustomRepository(LotteryRepository)
-            await userRepository.save(user)
-            await lotteryRepository.save(lottery)
-            return await betRepository.save(bet)
+        return await betRepository.save(<Bet>{
+            user: user,
+            number: number,
+            lottery: lottery,
+            createdAt: moment().unix(),
         })
 
     }

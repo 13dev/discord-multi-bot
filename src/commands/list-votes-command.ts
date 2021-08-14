@@ -1,17 +1,21 @@
-import {Message} from 'discord.js'
+import {Message, MessageEmbed} from 'discord.js'
 import {Command} from '@src/command'
 import DiscordClient from '@src/discord-client'
 import BetService from '@services/bet-service'
 import {Inject, Service} from 'typedi'
+import {LOTTERY_ID} from '@utils/consts'
 
 @Service()
 export default class ListVotesCommand extends Command {
     @Inject()
     private betService!: BetService
 
+    @Inject(LOTTERY_ID)
+    private lottery!: number
+
     constructor(client: DiscordClient) {
         super(client, {
-            description: 'List all votes.',
+            description: 'Lista de Todos os Votos',
             category: 'Information',
             requiredPermissions: [],
         })
@@ -19,15 +23,18 @@ export default class ListVotesCommand extends Command {
 
     public async run(message: Message): Promise<void> {
 
-        let output = ''
+        const exampleEmbed = new MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(this.commandOptions.description)
 
-        await this.betService.getBets().then(bets => {
-            bets.forEach(bet => {
-                output += `Number: ${bet.number} \n`
+        await this.betService.getBetsByLotteryId(this.lottery)
+            .then(bets => {
+                bets.forEach(bet => exampleEmbed.addField(bet.user.name, '`' + bet.number + '`', true))
             })
-        })
 
-        await super.respond(message.channel, '```' + output + '```')
+        exampleEmbed.setTimestamp()
+            .setFooter('Lottery Bot')
+        await super.respond(message.channel, exampleEmbed)
 
     }
 }

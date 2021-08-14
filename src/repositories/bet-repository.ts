@@ -4,8 +4,11 @@ import Bet from '@models/bet'
 @EntityRepository(Bet)
 export class BetRepository extends Repository<Bet> {
 
-    public async isBetTaken(number: number): Promise<Bet | undefined> {
-        return this.findOne({number: number})
+    public async getBetByNumberAndLottery(number: number, lottery: number): Promise<Bet | undefined> {
+        return this.findOne({
+            where: {number: number, lottery: lottery},
+            relations: ['user']
+        })
     }
 
 }

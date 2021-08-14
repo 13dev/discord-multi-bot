@@ -5,8 +5,6 @@ import {Container} from 'typeorm-typedi-extensions'
 import {Container as Container1} from 'typedi'
 import CommandResolver from '@src/resolver/command-resolver'
 import UserResolver from '@src/resolver/user-resolver'
-import {Token} from 'typedi'
-import User from '@models/user'
 import {USER} from '@utils/consts'
 import {DiscordLotteryError} from '@src/errors'
 
@@ -27,7 +25,7 @@ export default class OnReadyEvent implements BotEvent {
 
         const commandClass: typeof Command | undefined = CommandResolver.resolve(command)
 
-        if (commandClass === undefined) {
+        if (!commandClass) {
             return
         }
 
@@ -37,13 +35,14 @@ export default class OnReadyEvent implements BotEvent {
 
         const cmd: Command = await Container.get(commandClass)
 
-        if (!cmd.canRun(message.author, message)) return
+        if (!(await cmd.canRun(message.author, message))) return
 
         try {
             await cmd.run(message, argus)
         } catch (error) {
             if (error instanceof DiscordLotteryError) {
                 message.reply(error.message)
+                return
             }
             throw error
         }
