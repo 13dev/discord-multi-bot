@@ -27,7 +27,7 @@ export default class OnReadyEvent implements BotEvent {
 
         const commandClass: typeof Command | undefined = CommandResolver.resolve(command)
 
-        if (commandClass === undefined) {
+        if (!commandClass) {
             return
         }
 
@@ -44,6 +44,7 @@ export default class OnReadyEvent implements BotEvent {
         } catch (error) {
             if (error instanceof DiscordLotteryError) {
                 message.reply(error.message)
+                return
             }
             throw error
         }

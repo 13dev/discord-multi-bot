@@ -11,14 +11,14 @@ import Bet from '@src/models/bet'
 import {BetRepository} from '@repositories/bet-repository'
 import {InjectRepository} from 'typeorm-typedi-extensions'
 import {Inject, Service} from 'typedi'
-import {LOTTERY, USER} from '@utils/consts'
+import {LOTTERY_ID, USER} from '@utils/consts'
 import BetService from '@services/bet-service'
 import {Logger} from '@utils/logger'
 
 @Service()
 export default class LotteryService {
 
-    @Inject(LOTTERY)
+    @Inject(LOTTERY_ID)
     private _lottery?: Lottery
 
     @Inject(USER)

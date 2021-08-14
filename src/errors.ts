@@ -1,6 +1,7 @@
 import User from '@src/models/user'
 
-export class DiscordLotteryError extends Error {}
+export class DiscordLotteryError extends Error {
+}
 
 export class AlreadyVotedError extends DiscordLotteryError {
     constructor(user: User) {
