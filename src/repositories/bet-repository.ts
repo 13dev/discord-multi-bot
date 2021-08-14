@@ -1,13 +1,12 @@
 import {EntityRepository, Repository} from 'typeorm'
 import Bet from '@models/bet'
-import User from '@models/user'
 
 @EntityRepository(Bet)
-export class BetRepository extends Repository<User> {
+export class BetRepository extends Repository<Bet> {
 
-    isBetTaken(number: number) {
-        return this.find({
-            where: {number: number}
+    public async isBetTaken(number: number): Promise<Bet | undefined> {
+        return this.findOne({
+            where: {number: number},
         })
     }
 
