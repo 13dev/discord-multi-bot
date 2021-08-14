@@ -19,7 +19,7 @@ export default class OpenLotteryCommand extends Command {
         super(client, {
             description: 'Opens the current lottery to vots.',
             category: 'Information',
-            requiredPermissions: [],
+            requiredPermissions: ['ADMINISTRATOR'],
         })
     }
 
