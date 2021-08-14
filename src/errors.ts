@@ -1,6 +1,8 @@
 import User from '@src/models/user'
 
-export class AlreadyVotedError extends Error {
+export class DiscordLotteryError extends Error {}
+
+export class AlreadyVotedError extends DiscordLotteryError {
     constructor(user: User) {
         super()
         this.name = 'AlreadyVotedError'
@@ -8,7 +10,7 @@ export class AlreadyVotedError extends Error {
     }
 }
 
-export class LotteryClosedError extends Error {
+export class LotteryClosedError extends DiscordLotteryError {
     constructor(props?: string) {
         super(props)
         this.name = 'LotteryCloseError'
@@ -17,7 +19,7 @@ export class LotteryClosedError extends Error {
 
 }
 
-export class BetOutOfRangeError extends Error {
+export class BetOutOfRangeError extends DiscordLotteryError {
     constructor(props?: string) {
         super(props)
         this.name = 'BetOutOfRangeError'
@@ -25,11 +27,19 @@ export class BetOutOfRangeError extends Error {
     }
 }
 
-export class LotteryNotFoundError extends Error {
+export class LotteryNotFoundError extends DiscordLotteryError {
     constructor(props?: string) {
         super(props)
         this.name = 'LotteryNotFoundError'
         this.message = 'Lottery not found, please contact admin.'
+    }
+}
+
+export class UserNotFoundError extends DiscordLotteryError {
+    constructor(props?: string) {
+        super(props)
+        this.name = 'UserNotFoundError'
+        this.message = 'User not found, please contact admin.'
     }
 }
 

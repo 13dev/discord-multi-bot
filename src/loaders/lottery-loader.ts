@@ -25,7 +25,7 @@ export default class LotteryLoader {
                 }
 
                 Logger.info('Setting the lottery id to: ' + lottery.id.toString())
-                Container.set<Token<Lottery>>(LOTTERY, lottery)
+                Container.set(LOTTERY, lottery)
             })
             .catch(console.log)
 

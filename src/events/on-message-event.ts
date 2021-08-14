@@ -8,6 +8,7 @@ import UserResolver from '@src/resolver/user-resolver'
 import {Token} from 'typedi'
 import User from '@models/user'
 import {USER} from '@utils/consts'
+import {DiscordLotteryError} from '@src/errors'
 
 export default class OnReadyEvent implements BotEvent {
     type: EventType = EventType.MESSAGE
@@ -38,7 +39,14 @@ export default class OnReadyEvent implements BotEvent {
 
         if (!cmd.canRun(message.author, message)) return
 
-        await cmd.run(message, argus)
+        try {
+            await cmd.run(message, argus)
+        } catch (error) {
+            if (error instanceof DiscordLotteryError) {
+                message.reply(error.message)
+            }
+            throw error
+        }
 
     }
 }

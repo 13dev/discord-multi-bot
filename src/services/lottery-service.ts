@@ -1,11 +1,17 @@
-import {AlreadyVotedError, BetOutOfRangeError, LotteryClosedError, LotteryNotFoundError} from '@src/errors'
+import {
+    AlreadyVotedError,
+    BetOutOfRangeError,
+    LotteryClosedError,
+    LotteryNotFoundError,
+    UserNotFoundError,
+} from '@src/errors'
 import Lottery from '@src/models/lottery'
 import User from '@src/models/user'
 import Bet from '@src/models/bet'
 import {BetRepository} from '@repositories/bet-repository'
 import {InjectRepository} from 'typeorm-typedi-extensions'
 import {Inject, Service} from 'typedi'
-import {LOTTERY} from '@utils/consts'
+import {LOTTERY, USER} from '@utils/consts'
 import BetService from '@services/bet-service'
 import {Logger} from '@utils/logger'
 
@@ -14,6 +20,9 @@ export default class LotteryService {
 
     @Inject(LOTTERY)
     private _lottery?: Lottery
+
+    @Inject(USER)
+    private _user?: User
 
     constructor(@InjectRepository(Bet) private betRepository: BetRepository,
                 @Inject() private betService: BetService,
@@ -28,9 +37,16 @@ export default class LotteryService {
         return this._lottery
     }
 
-    public async bet(user: User, betNumber: number): Promise<void> {
+    get user(): User {
+        if (this._user === undefined) {
+            throw new UserNotFoundError()
+        }
+        return this._user
+    }
 
-        Logger.info(`Calling lotteryService: ${JSON.stringify(user)}, betnumber: ${betNumber}`)
+    public async bet(betNumber: number): Promise<void> {
+
+        Logger.info(`Calling lotteryService: ${JSON.stringify(this.user)}, betnumber: ${betNumber}`)
 
         if (!this.lottery.status) {
             throw new LotteryClosedError
@@ -46,7 +62,7 @@ export default class LotteryService {
             throw new BetOutOfRangeError()
         }
 
-        await this.betService.createBet(betNumber, this.lottery, user)
+        await this.betService.createBet(betNumber, this.lottery, this.user)
     }
 
 }
