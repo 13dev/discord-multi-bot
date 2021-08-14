@@ -24,9 +24,6 @@ export default class VoteCommand extends Command {
     }
 
     public async run(message: Message, args: string[]): Promise<void> {
-
-        console.log(this.currentUser)
-
-        await this.lotteryService.bet(this.currentUser, parseInt(args[0]))
+        await this.lotteryService.bet(parseInt(args[0]))
     }
 }
