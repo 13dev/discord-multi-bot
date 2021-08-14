@@ -2,8 +2,6 @@ import {getCustomRepository} from 'typeorm'
 import {UserRepository} from '@repositories/user-repository'
 import {User as DiscordUser} from 'discord.js'
 import User from '@models/user'
-import {Container, Token} from 'typedi'
-import {USER} from '@utils/consts'
 
 export default class UserResolver {
     public static async resolve(discordUser: DiscordUser): Promise<User> {
@@ -16,8 +14,6 @@ export default class UserResolver {
                 discordId: discordUser.id,
             })
         }
-
-        Container.set<Token<User>>(USER, user)
 
         return user
     }

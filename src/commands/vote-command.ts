@@ -4,12 +4,16 @@ import DiscordClient from '@src/discord-client'
 import {Container, Inject, Service} from 'typedi'
 import LotteryService from '@services/lottery-service'
 import User from '@models/user'
+import {USER} from '@utils/consts'
 
 @Service()
 export default class VoteCommand extends Command {
 
     @Inject()
     private lotteryService!: LotteryService
+
+    @Inject(USER)
+    private currentUser!: User
 
     constructor(client: DiscordClient) {
         super(client, {
@@ -21,11 +25,8 @@ export default class VoteCommand extends Command {
 
     public async run(message: Message, args: string[]): Promise<void> {
 
-        let user = new User
-        user.name = message.author.username
+        console.log(this.currentUser)
 
-        console.log(typeof message.author)
-
-        await this.lotteryService.bet(user, parseInt(args[0]))
+        await this.lotteryService.bet(this.currentUser, parseInt(args[0]))
     }
 }
