@@ -3,11 +3,15 @@ import {Command} from '@src/command'
 import DiscordClient from '@src/discord-client'
 import BetService from '@services/bet-service'
 import {Inject, Service} from 'typedi'
+import {LOTTERY_ID} from '@utils/consts'
 
 @Service()
 export default class ListVotesCommand extends Command {
     @Inject()
     private betService!: BetService
+
+    @Inject(LOTTERY_ID)
+    private lottery!: number
 
     constructor(client: DiscordClient) {
         super(client, {
@@ -21,9 +25,9 @@ export default class ListVotesCommand extends Command {
 
         let output = ''
 
-        await this.betService.getBets().then(bets => {
+        await this.betService.getBetsByLotteryId(this.lottery).then(bets => {
             bets.forEach(bet => {
-                output += `Number: ${bet.number} \n`
+                output += `Number: ${bet.number} User: ${bet.user.name} \n`
             })
         })
 
