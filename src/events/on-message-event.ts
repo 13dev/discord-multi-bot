@@ -2,7 +2,12 @@ import {BotEvent, EventType} from '@events/index'
 import DiscordClient from '@src/discord-client'
 import {Command} from '@src/command'
 import {Container} from 'typeorm-typedi-extensions'
+import {Container as Container1} from 'typedi'
 import CommandResolver from '@src/resolver/command-resolver'
+import UserResolver from '@src/resolver/user-resolver'
+import {Token} from 'typedi'
+import User from '@models/user'
+import {USER} from '@utils/consts'
 
 export default class OnReadyEvent implements BotEvent {
     type: EventType = EventType.MESSAGE
@@ -18,11 +23,16 @@ export default class OnReadyEvent implements BotEvent {
         const argus = message.content.split(/\s+/g)
         const command = argus.shift()!.slice(this.client.config.prefix.length)
 
+
         const commandClass: typeof Command | undefined = CommandResolver.resolve(command)
 
         if (commandClass === undefined) {
             return
         }
+
+        await UserResolver.resolve(message.author).then(user => {
+            Container1.set(USER, user)
+        })
 
         const cmd: Command = await Container.get(commandClass)
 

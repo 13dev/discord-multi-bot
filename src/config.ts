@@ -16,7 +16,7 @@ export const settings: BotSettings = {
 }
 
 export const database: SqliteConnectionOptions = {
-    database: 'database1.db',
+    database: 'database2.db',
     type: 'sqlite',
     entities: [
         __dirname + '/models/*.{js,ts}',

@@ -9,6 +9,9 @@ export default class User {
     @Column()
     name!: string
 
+    @Column({name: 'discord_id'})
+    discordId!: string
+
     @OneToMany(() => Bet, bet => bet.user)
     bets!: Bet[]
 }

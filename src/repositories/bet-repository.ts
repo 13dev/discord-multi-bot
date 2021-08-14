@@ -5,9 +5,7 @@ import Bet from '@models/bet'
 export class BetRepository extends Repository<Bet> {
 
     public async isBetTaken(number: number): Promise<Bet | undefined> {
-        return this.findOne({
-            where: {number: number},
-        })
+        return this.findOne({number: number})
     }
 
 }
