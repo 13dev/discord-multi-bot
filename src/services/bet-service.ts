@@ -1,19 +1,18 @@
-import {getConnection, getRepository, Repository} from 'typeorm'
+import {getConnection, getCustomRepository, getRepository, Repository} from 'typeorm'
 import Bet from '@models/bet'
 import moment from 'moment'
 import Lottery from '@models/lottery'
 import User from '@models/user'
 import {Service} from 'typedi'
-import {InjectRepository} from 'typeorm-typedi-extensions'
+import {UserRepository} from '@repositories/user-repository'
+import {LotteryRepository} from '@repositories/lottery-repository'
+import {BetRepository} from '@repositories/bet-repository'
 
 @Service()
 export default class BetService {
 
-    @InjectRepository(Bet)
-    private betRepository!: Repository<Bet>
-
     public async getBetsByLotteryId(lotteryId: number): Promise<Bet[]> {
-        return this.betRepository.find({
+        return getCustomRepository(BetRepository).find({
             where: {
                 lottery: {id: lotteryId},
             },
@@ -22,7 +21,7 @@ export default class BetService {
     }
 
     public async getBetsByUserId(userId: number): Promise<Bet[]> {
-        return this.betRepository.find({
+        return getCustomRepository(BetRepository).find({
             where: {
                 user: {id: userId},
             },
@@ -31,16 +30,25 @@ export default class BetService {
     }
 
     public async getBets(): Promise<Bet[]> {
-        return this.betRepository.find()
+        return getCustomRepository(BetRepository).find()
     }
 
     public async createBet(number: number, lottery: Lottery, user: User): Promise<Bet> {
-        const bet = new Bet()
-        bet.createdAt = moment().unix()
-        bet.number = number
-        bet.lottery = lottery
-        bet.user = user
-        return this.betRepository.save(bet)
+
+        return await getConnection().transaction(async manager => {
+            let bet = new Bet()
+            bet.createdAt = moment().unix()
+            bet.number = number
+            bet.lottery = lottery
+            bet.user = user
+
+            const betRepository = manager.getCustomRepository(BetRepository)
+            const userRepository = manager.getCustomRepository(UserRepository)
+            const lotteryRepository = manager.getCustomRepository(LotteryRepository)
+            await userRepository.save(user)
+            await lotteryRepository.save(lottery)
+            return await betRepository.save(bet)
+        })
 
     }
 
@@ -48,6 +56,6 @@ export default class BetService {
         const bet = new Bet()
         bet.id = id
 
-        return this.betRepository.remove(bet)
+        return getCustomRepository(BetRepository).remove(bet)
     }
 }

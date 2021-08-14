@@ -3,6 +3,7 @@ import DiscordClient from '@src/discord-client'
 import {Command} from '@src/command'
 import {Container} from 'typeorm-typedi-extensions'
 import CommandResolver from '@src/resolver/command-resolver'
+import UserResolver from '@src/resolver/user-resolver'
 
 export default class OnReadyEvent implements BotEvent {
     type: EventType = EventType.MESSAGE
@@ -27,6 +28,8 @@ export default class OnReadyEvent implements BotEvent {
         const cmd: Command = await Container.get(commandClass)
 
         if (!cmd.canRun(message.author, message)) return
+
+        await UserResolver.resolve(message.author)
 
         await cmd.run(message, argus)
 

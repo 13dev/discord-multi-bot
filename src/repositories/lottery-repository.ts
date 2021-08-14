@@ -5,7 +5,7 @@ import Lottery from '@models/lottery'
 export class LotteryRepository extends Repository<Lottery> {
 
     public async getCurrentLottery(): Promise<Lottery | undefined> {
-        return this.findOne({
+        return await this.findOne({
             order: {
                 id: 'DESC'
             }

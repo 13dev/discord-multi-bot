@@ -24,3 +24,12 @@ export class BetOutOfRangeError extends Error {
         this.message = 'Choose a number between x and x.'
     }
 }
+
+export class LotteryNotFoundError extends Error {
+    constructor(props?: string) {
+        super(props)
+        this.name = 'LotteryNotFoundError'
+        this.message = 'Lottery not found, please contact admin.'
+    }
+}
+
