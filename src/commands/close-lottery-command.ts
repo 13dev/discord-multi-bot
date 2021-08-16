@@ -18,7 +18,7 @@ export default class CloseLotteryCommand extends Command {
         super(client, {
             description: 'Closes the current lottery to vots.',
             category: 'Information',
-            requiredPermissions: [],
+            requiredPermissions: ['ADMINISTRATOR'],
         })
     }
 
