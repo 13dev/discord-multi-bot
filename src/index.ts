@@ -1,23 +1,29 @@
 import 'module-alias/register'
 import 'reflect-metadata'
-
 import {Container} from 'typeorm-typedi-extensions'
-import {Container as c} from 'typedi'
-import DiscordLoader from '@loaders/discord-loader'
-import TypeOrmLoader from '@loaders/typeorm-loader'
+import {Container as Container2} from 'typedi'
 import {useContainer} from 'typeorm'
-import LotteryLoader from '@loaders/lottery-loader'
-import {Logger} from '@utils/logger'
+import typeOrmLoader from '@loaders/typeorm-loader'
+import lotteryLoader from '@loaders/lottery-loader'
+import commandsLoader from '@loaders/commands-loader'
+import {USER} from '@utils/consts'
+import discordLoader from '@loaders/discord-loader'
 
-useContainer(Container)
+(async() => {
+    //TODO: Remove this.
+    Container2.set(USER, 0)
 
-Container.get(TypeOrmLoader).load()
-    .then(connection => {
-        Logger.info('TypeORM Created Connection!')
-        Container.get(DiscordLoader)
-        Container.get(LotteryLoader)
-    })
-    .catch(console.log)
+    await useContainer(Container)
+    await typeOrmLoader()
+    await discordLoader()
+    await lotteryLoader()
+    await commandsLoader()
+})()
+
+
+
+
+
 
 
 
