@@ -6,7 +6,7 @@ import {Inject, Service} from 'typedi'
 import {LOTTERY_ID} from '@utils/consts'
 
 @Service()
-export default class ListVotesCommand extends Command {
+export default class LotteryListCommand extends Command {
     @Inject()
     private betService!: BetService
 

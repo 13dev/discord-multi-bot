@@ -23,6 +23,7 @@
     "dotenv": "^10.0.0",
     "module-alias": "^2.2.2",
     "moment": "^2.29.1",
+    "node-recursive-directory": "^1.2.0",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.0.2",
     "ts-node-esm": "0.0.6",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.36",
+    "@types/fs-extra": "^9.0.12",
     "@types/node": "^16.4.13",
     "nodemon": "^2.0.12",
     "rimraf": "^3.0.2",

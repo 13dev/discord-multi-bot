@@ -7,7 +7,7 @@ import {LotteryRepository} from '@repositories/lottery-repository'
 import {getCustomRepository} from 'typeorm'
 
 @Service()
-export default class CloseLotteryCommand extends Command {
+export default class LotteryCloseCommand extends Command {
 
     @Inject(LOTTERY_ID)
     private lottery!: number
