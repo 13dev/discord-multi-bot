@@ -6,9 +6,9 @@ import {LOTTERY_ID} from '@utils/consts'
 
 @Service()
 export default class PingCommand extends Command {
-
     constructor(client: DiscordClient) {
         super(client, {
+            name: 'ping',
             description: 'Pings the bot.',
             category: 'Information',
             requiredPermissions: [],

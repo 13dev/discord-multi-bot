@@ -1,5 +1,5 @@
 import {Message, MessageEmbed} from 'discord.js'
-import {Command} from '@src/command'
+import {Command, CommandGroups} from '@src/command'
 import DiscordClient from '@src/discord-client'
 import BetService from '@services/bet-service'
 import {Inject, Service} from 'typedi'
@@ -15,6 +15,8 @@ export default class ListVotesCommand extends Command {
 
     constructor(client: DiscordClient) {
         super(client, {
+            name: 'list',
+            group: CommandGroups.LOTTERY,
             description: 'Lista de Todos os Votos',
             category: 'Information',
             requiredPermissions: [],
