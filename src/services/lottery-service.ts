@@ -24,7 +24,7 @@ export default class LotteryService {
     private _lottery!: number
 
     @Inject(USER)
-    private _user?: User
+    private _user!: User
 
     constructor(@InjectRepository(Bet) private betRepository: BetRepository,
                 @Inject() private betService: BetService,

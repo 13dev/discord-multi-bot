@@ -1,10 +1,8 @@
 import {createConnection, ConnectionOptions, Connection} from 'typeorm'
 import {database} from '@src/config'
-import {Service} from 'typedi'
+import {Logger} from '@utils/logger'
 
-@Service()
-export default class TypeOrmLoader {
-    public async load() {
-        return await createConnection(database as ConnectionOptions)
-    }
+export default async function typeOrmLoader() {
+    return await createConnection(database as ConnectionOptions)
+        .then(_ => Logger.info('TypeORM Created Connection!'))
 }

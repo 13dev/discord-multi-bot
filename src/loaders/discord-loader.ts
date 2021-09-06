@@ -3,29 +3,25 @@ import {settings} from '@src/config'
 import {Logger} from '@utils/logger'
 import events from '@events/index'
 import {Inject, Service} from 'typedi'
+import {Container} from 'typeorm-typedi-extensions'
 
-@Service()
-export default class DiscordLoader {
-    constructor(@Inject() private client: DiscordClient) {
-        Logger.info('Initing bot!')
+export default async function discordLoader() {
 
-        client.setConfig(settings)
+    const client = Container.get(DiscordClient)
+    Logger.info('Initing bot!')
 
-        this.initializeEvents(client)
+    client.setConfig(settings)
 
-        client.login(settings.token).then()
+    for (const event of events) {
+        // @ts-ignore
+        const Event = new event(client)
+
+        Logger.info('Event loaded', event)
+
+        client.on(Event.type.toString(), (...args: string[]) => Event.run(args))
     }
 
-    public initializeEvents(client: DiscordClient): void {
-        for (const event of events) {
-            // @ts-ignore
-            const Event = new event(client)
-
-            Logger.info('Event loaded', event)
-
-            client.on(Event.type.toString(), (...args: string[]) => Event.run(args))
-        }
-    }
+    await client.login(settings.token)
 
 }
 
