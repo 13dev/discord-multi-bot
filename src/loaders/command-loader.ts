@@ -10,6 +10,7 @@ export default async function commandLoader() {
         const dir = file.dirname === 'commands' ? '' : file.dirname + '/'
         const className = await import('@commands/' + dir + file.filename.replace('.ts', ''))
 
+
         const commandInstance = Container.get<Command>(className.default)
         const commandKey = commandInstance.commandOptions.group + '_' + commandInstance.commandOptions.name
 
