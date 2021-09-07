@@ -5,6 +5,7 @@ import CommandResolver from '@src/resolver/command-resolver'
 import UserResolver from '@src/resolver/user-resolver'
 import {USER} from '@utils/consts'
 import {DiscordLotteryError} from '@src/errors'
+import {Logger} from '@utils/logger'
 
 export default class OnReadyEvent implements BotEvent {
     type: EventType = EventType.MESSAGE
@@ -27,6 +28,7 @@ export default class OnReadyEvent implements BotEvent {
             return
         }
 
+        Logger.info('Calling command class: ' +  commandClass.constructor.name + ' - arguments: ' + argus)
         await UserResolver
             .resolve(message.author)
             .then(user => Container1.set(USER, user))
