@@ -10,7 +10,16 @@ import {
 import DiscordClient from '@src/discord-client'
 import {Inject} from 'typedi'
 
+
+export enum CommandGroups {
+    LOTTERY = 'lottery',
+    MUSIC = 'music',
+    GLOBAL = '',
+}
+
 export interface CommandOptions {
+    name: string
+    group?: CommandGroups
     description?: string
     category?: string
     requiredPermissions: PermissionString[]
@@ -24,6 +33,8 @@ export abstract class Command {
 
     protected constructor(@Inject() protected client: DiscordClient, options: CommandOptions) {
         this.commandOptions = {
+            name: options.name,
+            group: options.group || CommandGroups.GLOBAL,
             description: options.description || 'No information specified.',
             category: options.category || 'Information',
             requiredPermissions: options.requiredPermissions || ['READ_MESSAGES'],

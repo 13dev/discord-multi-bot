@@ -1,14 +1,13 @@
 import {Message} from 'discord.js'
-import {Command} from '@src/command'
+import {Command, CommandGroups} from '@src/command'
 import DiscordClient from '@src/discord-client'
-import {Container, Inject, Service} from 'typedi'
+import {Inject, Service} from 'typedi'
 import {LOTTERY_ID} from '@utils/consts'
-import Lottery from '@models/lottery'
 import {LotteryRepository} from '@repositories/lottery-repository'
 import {getCustomRepository} from 'typeorm'
 
 @Service()
-export default class OpenLotteryCommand extends Command {
+export default class LotteryOpenCommand extends Command {
 
     @Inject(LOTTERY_ID)
     private lottery!: number
@@ -17,6 +16,8 @@ export default class OpenLotteryCommand extends Command {
 
     constructor(client: DiscordClient) {
         super(client, {
+            name: 'open',
+            group: CommandGroups.LOTTERY,
             description: 'Opens the current lottery to vots.',
             category: 'Information',
             requiredPermissions: ['ADMINISTRATOR'],
