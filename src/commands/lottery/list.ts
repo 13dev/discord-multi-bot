@@ -6,9 +6,11 @@ import {Inject, Service} from 'typedi'
 import {LOTTERY_ID} from '@utils/consts'
 
 @Service()
-export default class LotteryListCommand extends Command {
+export default class  extends Command {
     @Inject()
     private betService!: BetService
+
+    group: CommandGroups = CommandGroups.LOTTERY
 
     @Inject(LOTTERY_ID)
     private lottery!: number
@@ -16,7 +18,6 @@ export default class LotteryListCommand extends Command {
     constructor(client: DiscordClient) {
         super(client, {
             name: 'list',
-            group: CommandGroups.LOTTERY,
             description: 'Lista de Todos os Votos',
             category: 'Information',
             requiredPermissions: [],

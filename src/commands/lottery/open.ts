@@ -7,18 +7,19 @@ import {LotteryRepository} from '@repositories/lottery-repository'
 import {getCustomRepository} from 'typeorm'
 
 @Service()
-export default class LotteryCloseCommand extends Command {
+export default class extends Command {
 
     @Inject(LOTTERY_ID)
     private lottery!: number
+
+    group: CommandGroups = CommandGroups.LOTTERY
 
     private lotteryRepository: LotteryRepository = getCustomRepository(LotteryRepository)
 
     constructor(client: DiscordClient) {
         super(client, {
-            name: 'close',
-            group: CommandGroups.LOTTERY,
-            description: 'Closes the current lottery to vots.',
+            name: 'open',
+            description: 'Opens the current lottery to vots.',
             category: 'Information',
             requiredPermissions: ['ADMINISTRATOR'],
         })
@@ -26,13 +27,13 @@ export default class LotteryCloseCommand extends Command {
 
     public async run(message: Message): Promise<void> {
         const lottery = await this.lotteryRepository.findOneOrFail(this.lottery)
-        if (!lottery.status) {
-            await super.respond(message.channel, 'Lottery already closed!')
+        if (lottery.status) {
+            await super.respond(message.channel, 'Lottery already opened!')
             return
         }
-        lottery.status = false
+        lottery.status = true
         await this.lotteryRepository.save(lottery)
 
-        await message.channel.send('Lottery is now closed!')
+        await message.channel.send('Lottery is now opened!')
     }
 }

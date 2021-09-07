@@ -5,7 +5,7 @@ import {Container, Service} from 'typedi'
 import {LOTTERY_ID} from '@utils/consts'
 
 @Service()
-export default class PingCommand extends Command {
+export default class extends Command {
     constructor(client: DiscordClient) {
         super(client, {
             name: 'ping',

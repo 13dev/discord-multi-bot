@@ -17,9 +17,9 @@ export default async function commandLoader() {
         const className = await import('@commands/' + dir + file.filename.replace('.ts', ''))
 
         const commandInstance = Container.get<Command>(className.default)
-        const commandKey = commandInstance.commandOptions.group + '_' + commandInstance.commandOptions.name
+        const commandKey = commandInstance.group + '_' + commandInstance.commandOptions.name
 
-        Logger.debug('Loading command', {command: commandInstance.constructor.name, key: commandKey})
+        Logger.debug('Loading command', {command: commandInstance.commandOptions.name, key: commandKey})
 
         CommandResolver.add(commandKey, commandInstance)
     })

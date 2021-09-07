@@ -6,15 +6,16 @@ import LotteryService from '@services/lottery-service'
 
 
 @Service()
-export default class VoteCommand extends Command {
+export default class extends Command {
 
     @Inject()
     private lotteryService!: LotteryService
 
+    group: CommandGroups = CommandGroups.LOTTERY
+
     constructor(client: DiscordClient) {
         super(client, {
             name: 'vote',
-            group: CommandGroups.LOTTERY,
             description: 'Apply vote to lottery',
             category: 'Information',
             requiredPermissions: [],

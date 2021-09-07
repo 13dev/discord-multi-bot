@@ -19,7 +19,6 @@ export enum CommandGroups {
 
 export interface CommandOptions {
     name: string
-    group?: CommandGroups
     description?: string
     category?: string
     requiredPermissions: PermissionString[]
@@ -30,11 +29,11 @@ export type EmbedOrMessage = MessageEmbed | string
 
 export abstract class Command {
     public commandOptions: CommandOptions
+    public group: CommandGroups = CommandGroups.GLOBAL
 
     protected constructor(@Inject() protected client: DiscordClient, options: CommandOptions) {
         this.commandOptions = {
             name: options.name,
-            group: options.group || CommandGroups.GLOBAL,
             description: options.description || 'No information specified.',
             category: options.category || 'Information',
             requiredPermissions: options.requiredPermissions || ['READ_MESSAGES'],
