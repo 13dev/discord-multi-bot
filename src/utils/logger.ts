@@ -8,13 +8,18 @@ export const Logger = createLogger({
     level: 'debug',
     format: combine(
         timestamp({format: 'DD/MM/YYYY HH:mm:ss'}),
-        printf((info) =>
-            colorizer.colorize(info.level, `[${info.timestamp}]: ${info.message} - ${JSON.stringify({
-                ...info,
-                level: undefined,
-                message: undefined,
-                timestamp: undefined,
-            })}`),
+        printf(info => {
+                const metadata = {
+                    ...info,
+                    level: undefined,
+                    message: undefined,
+                    timestamp: undefined,
+                }
+
+                return colorizer.colorize(info.level, `[${info.timestamp}]: ${info.message} ${
+                    JSON.stringify(metadata) !== '{}' ? '- ' + JSON.stringify(metadata) : ''
+                }`)
+            },
         ),
     ),
 })
