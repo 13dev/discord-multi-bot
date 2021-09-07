@@ -1,7 +1,5 @@
 import {BotEvent, EventType} from '@events/index'
 import DiscordClient from '@src/discord-client'
-import {Command} from '@src/command'
-import {Container} from 'typeorm-typedi-extensions'
 import {Container as Container1} from 'typedi'
 import CommandResolver from '@src/resolver/command-resolver'
 import UserResolver from '@src/resolver/user-resolver'
@@ -23,30 +21,31 @@ export default class OnReadyEvent implements BotEvent {
         const command = argus.shift()!.slice(this.client.config.prefix.length)
         const commandGroup = argus.shift() || ''
 
-
-        const commandClass: Command | undefined = CommandResolver.resolve(commandGroup + '_' + command)
+        const commandClass = CommandResolver.resolve(commandGroup + '_' + command)
 
         if (!commandClass) {
             return
         }
 
-        // await UserResolver.resolve(message.author).then(user => {
-        //     Container1.set(USER, user)
-        // })
-        //
-        // const cmd: Command = await Container.get(commandClass)
-        //
-        // if (!(await cmd.canRun(message.author, message))) return
-        //
-        // try {
-        //     await cmd.run(message, argus)
-        // } catch (error) {
-        //     if (error instanceof DiscordLotteryError) {
-        //         message.reply(error.message)
-        //         return
-        //     }
-        //     throw error
-        // }
+        await UserResolver
+            .resolve(message.author)
+            .then(user => Container1.set(USER, user))
+
+        //Verify if the user can actually run this command
+        if (!(await commandClass.canRun(message.author, message))) return
+
+        try {
+            await commandClass.run(message, argus)
+        } catch (error) {
+
+            //We will use the Error message prop to give user feedback what gone wrong.
+            if (error instanceof DiscordLotteryError) {
+                message.reply(error.message)
+                return
+            }
+
+            throw error
+        }
 
     }
 }

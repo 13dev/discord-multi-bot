@@ -20,7 +20,7 @@ export default async function commandLoader() {
 
         Logger.info('Loading command: ' + commandKey)
 
-        CommandResolver.add(commandKey, className.default)
+        CommandResolver.add(commandKey, commandInstance)
     })
 
 }
