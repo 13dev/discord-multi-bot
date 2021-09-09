@@ -16,6 +16,7 @@ export default class extends Command {
     }
 
     public async run(message: Message): Promise<void> {
-        await super.respond(message.channel, 'Pong! ' + JSON.stringify(Container.get(LOTTERY_ID)))
+        const m = await message.reply("Ping?")
+        await m.edit(":ping_pong: Pong! \n Latency is " + (m.createdTimestamp - message.createdTimestamp) + "ms. \n API Latency is " + Math.round(this.client.ws.ping))
     }
 }

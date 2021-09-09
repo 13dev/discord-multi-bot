@@ -18,6 +18,8 @@ import discordLoader from '@loaders/discord-loader'
     await discordLoader()
     await lotteryLoader()
     await commandLoader()
+
+    console.log('Bot is now running');
 })()
 
 
