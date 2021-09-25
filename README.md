@@ -146,8 +146,6 @@ Project Link: [https://github.com/13dev/discord-multi-bot](https://github.com/13
 * []()
 
 
-
-
 <!-- MARKDOWN LINKS & IMAGES -->
 [contributors-shield]: https://img.shields.io/github/contributors/13dev/repo.svg?style=for-the-badge
 [contributors-url]: https://github.com/13dev/discord-multi-bot/graphs/contributors
