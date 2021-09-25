@@ -1,18 +1,22 @@
 import { DMChannel, Message } from 'discord.js'
-import { Command } from '@src/command'
-import DiscordClient from '@src/discord-client'
+import { Command, CommandOptions } from '@src/command'
 import { Service } from 'typedi'
 import { Logger } from '@utils/logger'
 
 @Service()
 export default class extends Command {
-    constructor(client: DiscordClient) {
-        super(client, {
+
+    get options(): CommandOptions {
+        return {
             name: 'clear',
+            signature: {
+                command: 'clear',
+                arguments: ['limit'],
+            },
             description: 'Clear number of messages',
             category: 'Information',
             requiredPermissions: [],
-        })
+        }
     }
 
     public async run(message: Message, args: string[]): Promise<void> {
@@ -32,4 +36,5 @@ export default class extends Command {
             message.reply(`Erro a eliminar mensagens.`)
         })
     }
+
 }

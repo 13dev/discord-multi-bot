@@ -10,8 +10,14 @@ import {
 import DiscordClient from '@src/discord-client'
 import { Inject } from 'typedi'
 
+export interface CommandSignature {
+    command: string
+    arguments?: string[]
+}
+
 export interface CommandOptions {
     name: string
+    signature: CommandSignature
     description?: string
     category?: string
     requiredPermissions: PermissionString[]
@@ -21,21 +27,9 @@ export type AnyChannel = TextChannel | DMChannel | NewsChannel
 export type EmbedOrMessage = MessageEmbed | string
 
 export abstract class Command {
-    public commandOptions: CommandOptions
+    protected constructor(@Inject() protected client: DiscordClient) {}
 
-    protected constructor(
-        @Inject() protected client: DiscordClient,
-        options: CommandOptions
-    ) {
-        this.commandOptions = {
-            name: options.name,
-            description: options.description || 'No information specified.',
-            category: options.category || 'Information',
-            requiredPermissions: options.requiredPermissions || [
-                'READ_MESSAGES',
-            ],
-        }
-    }
+    abstract get options(): CommandOptions
 
     public async canRun(user: User, message: Message): Promise<boolean> {
         if (!message.member) {
@@ -43,7 +37,7 @@ export abstract class Command {
         }
 
         const hasPermission = message.member.hasPermission(
-            this.commandOptions.requiredPermissions,
+            this.options.requiredPermissions,
             {
                 checkAdmin: true,
                 checkOwner: true,

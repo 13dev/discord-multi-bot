@@ -1,18 +1,21 @@
 import { Message } from 'discord.js'
-import { Command } from '@src/command'
+import { Command, CommandOptions } from "@src/command";
 import DiscordClient from '@src/discord-client'
 import { Container, Service } from 'typedi'
 import { LOTTERY_ID } from '@utils/consts'
 
 @Service()
 export default class extends Command {
-    constructor(client: DiscordClient) {
-        super(client, {
+    get options(): CommandOptions {
+        return {
             name: 'ping',
+            signature: {
+              command: 'ping'
+            },
             description: 'Pings the bot.',
             category: 'Information',
             requiredPermissions: [],
-        })
+        }
     }
 
     public async run(message: Message): Promise<void> {

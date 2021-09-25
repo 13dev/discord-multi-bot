@@ -1,5 +1,5 @@
 import { Message } from 'discord.js'
-import { Command } from '@src/command'
+import { Command, CommandOptions } from '@src/command'
 import DiscordClient from '@src/discord-client'
 import { Inject, Service } from 'typedi'
 import LotteryService from '@services/lottery-service'
@@ -9,16 +9,20 @@ export default class extends Command {
     @Inject()
     private lotteryService!: LotteryService
 
-    constructor(client: DiscordClient) {
-        super(client, {
+    public async run(message: Message, args: string[]): Promise<void> {
+        await this.lotteryService.bet(parseInt(args[0]))
+    }
+
+    get options(): CommandOptions {
+        return {
             name: 'lottery vote',
+            signature: {
+                command: 'lottery vote',
+                arguments: ['voteNumber'],
+            },
             description: 'Apply vote to lottery',
             category: 'Information',
             requiredPermissions: [],
-        })
-    }
-
-    public async run(message: Message, args: string[]): Promise<void> {
-        await this.lotteryService.bet(parseInt(args[0]))
+        }
     }
 }
