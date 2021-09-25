@@ -1,23 +1,22 @@
-import {Message} from 'discord.js'
-import {Command, CommandGroups} from '@src/command'
+import { Message } from 'discord.js'
+import { Command } from '@src/command'
 import DiscordClient from '@src/discord-client'
-import {Inject, Service} from 'typedi'
-import {LOTTERY_ID} from '@utils/consts'
-import {LotteryRepository} from '@repositories/lottery-repository'
-import {getCustomRepository} from 'typeorm'
+import { Inject, Service } from 'typedi'
+import { LOTTERY_ID } from '@utils/consts'
+import { LotteryRepository } from '@repositories/lottery-repository'
+import { getCustomRepository } from 'typeorm'
 
 @Service()
 export default class LotteryCloseCommand extends Command {
-    group: CommandGroups = CommandGroups.LOTTERY
-
     @Inject(LOTTERY_ID)
     private lottery!: number
 
-    private lotteryRepository: LotteryRepository = getCustomRepository(LotteryRepository)
+    private lotteryRepository: LotteryRepository =
+        getCustomRepository(LotteryRepository)
 
     constructor(client: DiscordClient) {
         super(client, {
-            name: 'close',
+            name: 'lottery close',
             description: 'Closes the current lottery to vots.',
             category: 'Information',
             requiredPermissions: ['ADMINISTRATOR'],
