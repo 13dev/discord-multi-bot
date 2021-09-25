@@ -19,14 +19,15 @@ export default class extends Command {
         if (message.channel instanceof DMChannel) {
             return
         }
-        const limit = Number(args[0]) + 1
+
+        const limit = Number(args[0])
 
         if (limit < 0 || limit > 20) {
             await message.reply('Introduz numbero entre 0 - 20.')
             return
         }
 
-        message.channel.bulkDelete(limit).catch((error) => {
+        message.channel.bulkDelete(limit + 1).catch((error) => {
             Logger.info('Error deleting messages', { error: error })
             message.reply(`Erro a eliminar mensagens.`)
         })
