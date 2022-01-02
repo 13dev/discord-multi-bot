@@ -1,8 +1,7 @@
 import { Message } from 'discord.js'
 import { Command, CommandOptions } from '@src/command'
-import DiscordClient from '@src/discord-client'
 import { Inject, Service } from 'typedi'
-import LotteryService from '@services/lottery-service'
+import LotteryService from '@services/lottery.service'
 
 @Service()
 export default class extends Command {

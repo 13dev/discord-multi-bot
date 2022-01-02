@@ -1,16 +1,20 @@
 import { BotEvent, EventType } from '@events/index'
-import DiscordClient from '@src/discord-client'
 import { Container as Container1 } from 'typedi'
-import CommandResolver from '@src/resolver/command-resolver'
-import UserResolver from '@src/resolver/user-resolver'
-import { USER } from '@utils/consts'
-import { DiscordLotteryError } from '@src/errors'
-import { Logger } from '@utils/logger'
+import CommandResolver from '@src/resolvers/command.resolver'
+import UserResolver from '@src/resolvers/user.resolver'
+import { USER } from '@utils/consts.util'
+import { LoggerUtil } from '@utils/logger.util'
+import { createParser, Parser } from 'discord-cmd-parser'
+import DiscordClient from '@src/adapters/discord.adapter'
+import { DiscordLotteryError } from '@src/errors/lottery.errors'
+import { MusicNotFoundError, PlayerError } from '@src/errors/player.errors'
 
 export default class OnReadyEvent implements BotEvent {
-    type: EventType = EventType.MESSAGE
+    public type: EventType = EventType.MESSAGE
 
-    constructor(private client: DiscordClient) {}
+    constructor(private client: DiscordClient, private parser: Parser) {
+        this.parser = createParser()
+    }
 
     public async run(args: any): Promise<void> {
         const [message] = args
@@ -24,20 +28,21 @@ export default class OnReadyEvent implements BotEvent {
         const argus = message.content.split(/\s+/g)
         const command = argus.shift()!.slice(this.client.config.prefix.length)
 
-        console.log(argus, command)
+        console.log(command, argus)
 
-        const commandClass = CommandResolver.resolve(command)
+        let commandClass = CommandResolver.resolve(command)
 
         if (!commandClass) {
+            // Command not found!
+            await message.reply('Command not found!')
             return
         }
 
-        Logger.info(
-            'Calling command class: ' +
-                commandClass.constructor.name +
-                ' - arguments: ' +
-                argus
-        )
+        LoggerUtil.info('Calling command.', {
+            command: commandClass.options.signature.command,
+            args: argus,
+        })
+
         await UserResolver.resolve(message.author).then((user) =>
             Container1.set(USER, user)
         )
@@ -49,7 +54,10 @@ export default class OnReadyEvent implements BotEvent {
             await commandClass.run(message, argus)
         } catch (error) {
             //We will use the Error message prop to give user feedback what gone wrong.
-            if (error instanceof DiscordLotteryError) {
+            if (
+                error instanceof DiscordLotteryError ||
+                error instanceof PlayerError
+            ) {
                 message.reply(error.message)
                 return
             }

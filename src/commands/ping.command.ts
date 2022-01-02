@@ -1,8 +1,6 @@
 import { Message } from 'discord.js'
 import { Command, CommandOptions } from '@src/command'
-import DiscordClient from '@src/discord-client'
 import { Container, Service } from 'typedi'
-import { LOTTERY_ID } from '@utils/consts'
 
 @Service()
 export default class extends Command {
@@ -11,6 +9,7 @@ export default class extends Command {
             name: 'ping',
             signature: {
                 command: 'ping',
+                arguments: ['s'],
             },
             description: 'Pings the bot.',
             category: 'Information',

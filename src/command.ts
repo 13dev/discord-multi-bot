@@ -6,9 +6,11 @@ import {
     DMChannel,
     TextChannel,
     MessageEmbed,
+    MessageOptions,
+    MessagePayload,
 } from 'discord.js'
-import DiscordClient from '@src/discord-client'
 import { Inject } from 'typedi'
+import DiscordClient from '@src/adapters/discord.adapter'
 
 export interface CommandSignature {
     command: string
@@ -24,7 +26,7 @@ export interface CommandOptions {
 }
 
 export type AnyChannel = TextChannel | DMChannel | NewsChannel
-export type EmbedOrMessage = MessageEmbed | string
+export type EmbedOrMessage = string | MessageOptions | MessagePayload
 
 export abstract class Command {
     protected constructor(@Inject() protected client: DiscordClient) {}
@@ -36,13 +38,14 @@ export abstract class Command {
             return false
         }
 
-        const hasPermission = message.member.hasPermission(
-            this.options.requiredPermissions,
-            {
-                checkAdmin: true,
-                checkOwner: true,
-            }
-        )
+        // const hasPermission = message.member.per.hasPermission(
+        //     this.options.requiredPermissions,
+        //     {
+        //         checkAdmin: true,
+        //         checkOwner: true,
+        //     }
+        // )
+        const hasPermission = true
 
         if (!hasPermission) {
             await message.channel.send(
@@ -62,5 +65,5 @@ export abstract class Command {
         return this
     }
 
-    public abstract run(message: Message, args: string[]): Promise<void>
+    public abstract run(message: Message, args: Object): Promise<void>
 }

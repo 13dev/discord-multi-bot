@@ -1,13 +1,12 @@
 import { Message } from 'discord.js'
 import { Command, CommandOptions } from '@src/command'
-import DiscordClient from '@src/discord-client'
 import { Inject, Service } from 'typedi'
-import { LOTTERY_ID } from '@utils/consts'
-import { LotteryRepository } from '@repositories/lottery-repository'
+import { LOTTERY_ID } from '@utils/consts.util'
+import { LotteryRepository } from '@repositories/lottery.repository'
 import { getCustomRepository } from 'typeorm'
 
 @Service()
-export default class x extends Command {
+export default class extends Command {
     @Inject(LOTTERY_ID)
     private lottery!: number
 
@@ -16,26 +15,24 @@ export default class x extends Command {
 
     public async run(message: Message): Promise<void> {
         const lottery = await this.lotteryRepository.findOneOrFail(this.lottery)
-
-        if (lottery.status) {
-            await super.respond(message.channel, 'Lottery already opened!')
-            return
-        }
-
-        lottery.status = true
+        // if (!lottery.status) {
+        //     await super.respond(message.channel, 'LotteryModel already closed!')
+        //     return
+        // }
+        lottery.status = false
         await this.lotteryRepository.save(lottery)
 
-        await message.channel.send('Lottery is now opened!')
+        await message.channel.send('LotteryModel is now closed!')
     }
 
     get options(): CommandOptions {
         return {
+            name: 'lottery close',
             signature: {
-                command: 'lottery open',
-                arguments: [],
+                command: 'lottery close',
+                arguments: ['limit'],
             },
-            name: 'lottery open',
-            description: 'Opens the current lottery to vots.',
+            description: 'Closes the current lottery to vots.',
             category: 'Information',
             requiredPermissions: ['ADMINISTRATOR'],
         }

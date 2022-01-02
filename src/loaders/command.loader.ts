@@ -1,7 +1,7 @@
 import { Command } from '@src/command'
 import { Container } from 'typeorm-typedi-extensions'
-import { Logger } from '@utils/logger'
-import CommandResolver from '@src/resolver/command-resolver'
+import { LoggerUtil } from '@utils/logger.util'
+import CommandResolver from '@src/resolvers/command.resolver'
 
 const getFiles = require('node-recursive-directory')
 
@@ -18,10 +18,10 @@ export default async function commandLoader() {
         )
 
         const commandInstance = Container.get<Command>(className.default)
-        const commandKey = commandInstance.commandOptions.name
+        const commandKey = commandInstance.options.name
 
-        Logger.debug('Loading command', {
-            command: commandInstance.commandOptions.name,
+        LoggerUtil.debug('Loading command', {
+            command: commandInstance.options.name,
             key: commandKey,
         })
 

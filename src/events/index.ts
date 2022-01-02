@@ -1,5 +1,5 @@
-import message from '@events/on-message-event'
-import ready from '@events/on-ready-event'
+import message from '@events/message.event'
+import ready from '@events/ready.event'
 
 export enum EventType {
     READY = 'ready',
@@ -12,7 +12,4 @@ export interface BotEvent {
     run(args?: any[]): void
 }
 
-export default [
-    message,
-    ready,
-]
+export default [message, ready]
