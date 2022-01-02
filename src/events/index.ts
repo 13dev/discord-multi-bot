@@ -3,7 +3,7 @@ import ready from '@events/ready.event'
 
 export enum EventType {
     READY = 'ready',
-    MESSAGE = 'message',
+    MESSAGE = 'messageCreate',
 }
 
 export interface BotEvent {

@@ -8,7 +8,7 @@ export enum PlayerProvider {
     YOUTUBE_SEARCH,
 }
 
-export default class PlayerProviderResolver {
+export class PlayerProviderResolver {
     public static resolve(rawUrl: string): [PlayerProvider, URL | string] {
         try {
             const url = new URL(rawUrl)

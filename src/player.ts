@@ -27,10 +27,9 @@ export enum STATUS {
 }
 
 @Service()
-export default class {
+export class Player {
     public status = STATUS.PAUSED
     public voiceConnection: VoiceConnection | null = null
-    private queuePosition = 0
     private audioPlayer: AudioPlayer | null = null
     private nowPlaying: QueuedSong | null = null
     private playPositionInterval: NodeJS.Timeout | undefined
@@ -41,7 +40,11 @@ export default class {
     private readonly discordClient!: DiscordClient
 
     @Inject()
-    private readonly queue!: PlayerQueue
+    private readonly _queue!: PlayerQueue
+
+    get queue(): PlayerQueue {
+        return this._queue
+    }
 
     constructor() {
         ffmpeg.setFfmpegPath(path)
@@ -77,7 +80,7 @@ export default class {
             throw new Error('Not connected to a voice channel.')
         }
 
-        const currentSong = this.queue.getCurrent()
+        const currentSong = this._queue.getCurrent()
 
         if (!currentSong) {
             throw new Error('No song currently playing')
@@ -116,7 +119,7 @@ export default class {
             throw new Error('Not connected to a voice channel.')
         }
 
-        const currentSong = this.queue.getCurrent()
+        const currentSong = this._queue.getCurrent()
 
         if (!currentSong) {
             throw new Error('Queue empty.')
@@ -163,7 +166,7 @@ export default class {
                 this.lastSongURL = currentSong.url
             }
         } catch (error: unknown) {
-            const currentSong = this.queue.getCurrent()
+            const currentSong = this._queue.getCurrent()
             await this.forward(1)
 
             if (
@@ -204,21 +207,21 @@ export default class {
         this.manualForward(skip)
 
         try {
-            if (this.queue.getCurrent() && this.status !== STATUS.PAUSED) {
+            if (this._queue.getCurrent() && this.status !== STATUS.PAUSED) {
                 await this.play()
             } else {
                 this.status = STATUS.PAUSED
                 this.disconnect()
             }
         } catch (error: unknown) {
-            this.queuePosition--
+            this._queue.position--
             throw error
         }
     }
 
     manualForward(skip: number): void {
-        if (this.queuePosition + skip - 1 < this.queue.getQueue().length) {
-            this.queuePosition += skip
+        if (this._queue.position + skip - 1 < this._queue.getQueue().length) {
+            this._queue.position += skip
             this.positionInSeconds = 0
             this.stopTrackingPosition()
         } else {
@@ -227,8 +230,8 @@ export default class {
     }
 
     async back(): Promise<void> {
-        if (this.queuePosition - 1 >= 0) {
-            this.queuePosition--
+        if (this._queue.position - 1 >= 0) {
+            this._queue.position--
             this.positionInSeconds = 0
             this.stopTrackingPosition()
 

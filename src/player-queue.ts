@@ -22,21 +22,29 @@ type QueuedSongWithoutChannel = Except<QueuedSong, 'addedInChannelId'>
 @Service()
 export class PlayerQueue {
     private queue: QueuedSong[] = []
-    private queuePosition = 0
+    private _position = 0
+
+    set position(value: number) {
+        this._position = value
+    }
+
+    get position(): number {
+        return this._position
+    }
 
     public getCurrent(): QueuedSong | null {
-        if (this.queue[this.queuePosition]) {
-            return this.queue[this.queuePosition]
+        if (this.queue[this._position]) {
+            return this.queue[this._position]
         }
 
         return null
     }
 
     public shuffle(): void {
-        const shuffledSongs = shuffle(this.queue.slice(this.queuePosition + 1))
+        const shuffledSongs = shuffle(this.queue.slice(this._position + 1))
 
         this.queue = [
-            ...this.queue.slice(0, this.queuePosition + 1),
+            ...this.queue.slice(0, this._position + 1),
             ...shuffledSongs,
         ]
     }
@@ -49,7 +57,7 @@ export class PlayerQueue {
         }
 
         // Add as the next song to be played
-        const insertAt = this.queuePosition + 1
+        const insertAt = this._position + 1
         this.queue = [
             ...this.queue.slice(0, insertAt),
             song,
@@ -62,7 +70,7 @@ export class PlayerQueue {
      * @returns {QueuedSong[]}
      */
     public getQueue(): QueuedSong[] {
-        return this.queue.slice(this.queuePosition + 1)
+        return this.queue.slice(this._position + 1)
     }
 
     public size(): number {
@@ -74,13 +82,13 @@ export class PlayerQueue {
     }
 
     public remove(index: number, amount = 1): void {
-        this.queue.splice(this.queuePosition + index, amount)
+        this.queue.splice(this._position + index, amount)
     }
 
     public removeCurrent(): void {
         this.queue = [
-            ...this.queue.slice(0, this.queuePosition),
-            ...this.queue.slice(this.queuePosition + 1),
+            ...this.queue.slice(0, this._position),
+            ...this.queue.slice(this._position + 1),
         ]
     }
 
@@ -94,7 +102,7 @@ export class PlayerQueue {
             newQueue.push(current)
         }
 
-        this.queuePosition = 0
+        this._position = 0
         this.queue = newQueue
     }
 }

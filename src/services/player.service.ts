@@ -1,5 +1,5 @@
-import Player from '@src/player'
 import { Container, Service } from 'typedi'
+import { Player } from '@src/player'
 
 @Service()
 export default class {

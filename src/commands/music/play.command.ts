@@ -5,9 +5,8 @@ import {
     getMemberVoiceChannel,
     getMostPopularVoiceChannel,
 } from '@utils/channels.util'
-import { STATUS } from '@src/player'
+import { Player, STATUS } from '@src/player'
 import PlayerService from '@services/player.service'
-import { Except } from 'type-fest'
 import GetSongsService from '@services/songs.service'
 import {
     AlreadyPlayingError,
@@ -16,7 +15,8 @@ import {
     NothingToPlayError,
 } from '@src/errors/player.errors'
 import { Config } from '@src/config'
-import PlayerProviderResolver, {
+import {
+    PlayerProviderResolver,
     PlayerProvider,
 } from '@src/resolvers/player-provider.resolver'
 import { PlayerQueue, QueuedSong } from '@src/player-queue'
@@ -25,12 +25,10 @@ import { PlayerQueue, QueuedSong } from '@src/player-queue'
 export default class extends Command {
     @Inject()
     private readonly playerService!: PlayerService
+    private player!: Player
 
     @Inject()
     private readonly getSongs!: GetSongsService
-
-    @Inject()
-    private readonly queue!: PlayerQueue
 
     private channelId!: string
     private addToFrontOfQueue: boolean = false
@@ -53,12 +51,12 @@ export default class extends Command {
             getMemberVoiceChannel(message.member!) ??
             getMostPopularVoiceChannel(message.guild!)
 
-        const player = this.playerService.get(message.guild!.id)
+        this.player = this.playerService.get(message.guild!.id)
 
-        const wasPlayingSong = this.queue.getCurrent() !== null
+        const wasPlayingSong = this.player.queue.getCurrent() !== null
 
         if (args.length === 0) {
-            if (player.status === STATUS.PLAYING) {
+            if (this.player.status === STATUS.PLAYING) {
                 throw new AlreadyPlayingError()
             }
 
@@ -67,8 +65,8 @@ export default class extends Command {
                 throw new NothingToPlayError()
             }
 
-            await player.connect(targetVoiceChannel)
-            await player.play()
+            await this.player.connect(targetVoiceChannel)
+            await this.player.play()
 
             return
         }
@@ -76,6 +74,7 @@ export default class extends Command {
         this.addToFrontOfQueue =
             args[args.length - 1] === 'i' ||
             args[args.length - 1] === 'immediate'
+        this.channelId = message.channel.id
 
         let extraMsg = ''
 
@@ -99,21 +98,21 @@ export default class extends Command {
                 break
         }
 
-        this.channelId = message.channel.id
+        console.log(this.player.queue.size())
 
-        if (!this.queue.size()) {
-            throw new NoSongsFoundError()
-        }
+        // if (this.player.queue.isEmpty()) {
+        //     throw new NoSongsFoundError()
+        // }
 
-        const firstSong = this.queue.getQueue()[0]
+        const firstSong = this.player.queue.getQueue()[0]
 
         let statusMsg = ''
 
-        if (player.voiceConnection === null) {
-            await player.connect(targetVoiceChannel)
+        if (this.player.voiceConnection === null) {
+            await this.player.connect(targetVoiceChannel)
 
             // Resume / start playback
-            await player.play()
+            await this.player.play()
 
             if (wasPlayingSong) {
                 statusMsg = 'resuming playback'
@@ -133,7 +132,7 @@ export default class extends Command {
             extraMsg = ` (${extraMsg})`
         }
 
-        if (this.queue.size() > 0) {
+        if (this.player.queue.size() > 0) {
             await message.channel.send(
                 `**${firstSong.title}** added to the${
                     this.addToFrontOfQueue ? ' front of the' : ''
@@ -143,18 +142,19 @@ export default class extends Command {
         }
 
         await message.channel.send(
-            `u betcha, **${firstSong.title}** and ${
-                this.queue.size() - 1
+            `**${firstSong.title}** and ${
+                this.player.queue.size() - 1
             } other songs were added to the queue${extraMsg}`
         )
     }
 
     private async handleSpotifyPlaylist(url: string) {
+        console.log(url)
         const [convertedSongs, nSongsNotFound, totalSongs] =
             await this.getSongs.spotifySource(url, Config.playlistLimit)
 
         for (const song of convertedSongs) {
-            this.queue.add(
+            this.player.queue.add(
                 { ...song, addedInChannelId: this.channelId },
                 this.addToFrontOfQueue
             )
@@ -167,7 +167,7 @@ export default class extends Command {
         )
 
         for (const song of songs) {
-            this.queue.add(song as QueuedSong)
+            this.player.queue.add(song as QueuedSong)
         }
     }
 
@@ -178,7 +178,12 @@ export default class extends Command {
             throw new MusicNotFoundError()
         }
 
-        this.queue.add(song as QueuedSong)
+        console.log('Addding yt single', song as QueuedSong)
+
+        console.log(this.player.queue)
+        this.player.queue.add(song as QueuedSong)
+
+        console.log(this.player.queue)
     }
 
     private async handleYoutubeSearch(url: string, args: string[]) {
@@ -193,6 +198,6 @@ export default class extends Command {
             throw new MusicNotFoundError()
         }
 
-        this.queue.add(song as QueuedSong)
+        this.player.queue.add(song as QueuedSong)
     }
 }
