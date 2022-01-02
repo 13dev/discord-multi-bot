@@ -1,4 +1,3 @@
-import { Command } from '@src/command'
 import { Config } from '@src/config'
 
 export enum PlayerProvider {
@@ -9,11 +8,7 @@ export enum PlayerProvider {
     YOUTUBE_SEARCH,
 }
 
-export type PlayerProviderHandler = (url: URL | string) => void
-
 export default class PlayerProviderResolver {
-    static providersHandlers = new Map<PlayerProvider, PlayerProviderHandler>()
-
     public static resolve(rawUrl: string): [PlayerProvider, URL | string] {
         try {
             const url = new URL(rawUrl)
@@ -38,22 +33,5 @@ export default class PlayerProviderResolver {
         }
 
         return [PlayerProvider.YOUTUBE_SEARCH, rawUrl]
-    }
-
-    public static add(
-        provider: PlayerProvider,
-        callback: PlayerProviderHandler
-    ): void {}
-
-    private static executeHandler(provider: PlayerProvider, url: URL | string) {
-        const callback = PlayerProviderResolver.providersHandlers.get(provider)
-
-        if (!callback) {
-            throw new Error(
-                'Callback for ' + provider.toString() + 'does not exists'
-            )
-        }
-
-        callback(url)
     }
 }

@@ -1,7 +1,5 @@
-import { Client } from 'discord.js'
 import Player from '@src/player'
 import { Container, Service } from 'typedi'
-import { PlayerQueue } from '@src/player-queue'
 
 @Service()
 export default class {

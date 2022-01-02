@@ -37,13 +37,7 @@ export const getMostPopularVoiceChannel = (
 
     // Find most popular channel
     const popularChannel = voiceChannels.reduce(
-        (popular: PopularResult, elem: PopularResult) => {
-            if (elem.n > popular.n) {
-                return elem
-            }
-
-            return popular
-        },
+        (popular, elem) => (elem.n > popular.n ? elem : popular),
         { n: -1, channel: null }
     )
 

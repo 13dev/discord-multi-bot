@@ -83,10 +83,10 @@ export default class extends Command {
 
         switch (provider) {
             case PlayerProvider.SPOTIFY_PLAYLIST:
-                await this.handleSpotifyPlaylist(url as string)
+                await this.handleSpotifyPlaylist(url.toString())
                 break
             case PlayerProvider.SPOTIFY_TRACK:
-                await this.handleSpotifyPlaylist(url as string)
+                await this.handleSpotifyPlaylist(url.toString())
                 break
             case PlayerProvider.YOUTUBE_PLAYLIST:
                 await this.handleYoutubePlaylist(url as URL)
