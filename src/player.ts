@@ -19,7 +19,7 @@ import {
 import { Inject, Service } from 'typedi'
 import { path } from '@ffmpeg-installer/ffmpeg'
 import DiscordClient from '@src/adapters/discord.adapter'
-import { PlayerQueue, QueuedSong } from '@src/player-queue'
+import { Queue, QueuedSong } from '@src/queue'
 
 export enum STATUS {
     PLAYING,
@@ -29,7 +29,7 @@ export enum STATUS {
 @Service()
 export class Player {
     public status = STATUS.PAUSED
-    public voiceConnection: VoiceConnection | null = null
+    private voiceConnection: VoiceConnection | null = null
     private audioPlayer: AudioPlayer | null = null
     private nowPlaying: QueuedSong | null = null
     private playPositionInterval: NodeJS.Timeout | undefined
@@ -40,14 +40,14 @@ export class Player {
     private readonly discordClient!: DiscordClient
 
     @Inject()
-    private readonly _queue!: PlayerQueue
-
-    get queue(): PlayerQueue {
-        return this._queue
-    }
+    private readonly queue!: Queue
 
     constructor() {
         ffmpeg.setFfmpegPath(path)
+    }
+
+    public isConnected(): boolean {
+        return this.voiceConnection instanceof VoiceConnection
     }
 
     async connect(channel: VoiceChannel): Promise<void> {
@@ -80,7 +80,7 @@ export class Player {
             throw new Error('Not connected to a voice channel.')
         }
 
-        const currentSong = this._queue.getCurrent()
+        const currentSong = this.queue.getCurrent()
 
         if (!currentSong) {
             throw new Error('No song currently playing')
@@ -119,7 +119,7 @@ export class Player {
             throw new Error('Not connected to a voice channel.')
         }
 
-        const currentSong = this._queue.getCurrent()
+        const currentSong = this.queue.getCurrent()
 
         if (!currentSong) {
             throw new Error('Queue empty.')
@@ -166,14 +166,14 @@ export class Player {
                 this.lastSongURL = currentSong.url
             }
         } catch (error: unknown) {
-            const currentSong = this._queue.getCurrent()
+            const currentSong = this.queue.getCurrent()
             await this.forward(1)
 
             if (
                 (error as { statusCode: number }).statusCode === 410 &&
                 currentSong
             ) {
-                const channelId = currentSong.addedInChannelId
+                const channelId = currentSong.channelId
 
                 if (channelId) {
                     await (
@@ -207,21 +207,21 @@ export class Player {
         this.manualForward(skip)
 
         try {
-            if (this._queue.getCurrent() && this.status !== STATUS.PAUSED) {
+            if (this.queue.getCurrent() && this.status !== STATUS.PAUSED) {
                 await this.play()
             } else {
                 this.status = STATUS.PAUSED
                 this.disconnect()
             }
         } catch (error: unknown) {
-            this._queue.position--
+            this.queue.position--
             throw error
         }
     }
 
     manualForward(skip: number): void {
-        if (this._queue.position + skip - 1 < this._queue.size()) {
-            this._queue.position += skip
+        if (this.queue.position + skip - 1 < this.queue.size()) {
+            this.queue.position += skip
             this.positionInSeconds = 0
             this.stopTrackingPosition()
         } else {
@@ -230,8 +230,8 @@ export class Player {
     }
 
     async back(): Promise<void> {
-        if (this._queue.position - 1 >= 0) {
-            this._queue.position--
+        if (this.queue.position - 1 >= 0) {
+            this.queue.position--
             this.positionInSeconds = 0
             this.stopTrackingPosition()
 

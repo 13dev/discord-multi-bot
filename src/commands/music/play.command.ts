@@ -19,20 +19,24 @@ import {
     PlayerProviderResolver,
     PlayerProvider,
 } from '@src/resolvers/player-provider.resolver'
-import { PlayerQueue, QueuedSong } from '@src/player-queue'
+import { Queue, QueuedSong } from '@src/queue'
 import { LoggerUtil } from '@utils/logger.util'
+import { PlayerProviderFactory } from '@src/factories/player-provider.factory'
 
 @Service()
 export default class extends Command {
     @Inject()
     private readonly playerService!: PlayerService
-    private player!: Player
 
     @Inject()
     private readonly getSongs!: GetSongsService
 
+    @Inject()
+    private readonly queue!: Queue
+
     private channelId!: string
     private addToFrontOfQueue: boolean = false
+    private player!: Player
 
     get options(): CommandOptions {
         return {
@@ -54,7 +58,7 @@ export default class extends Command {
 
         this.player = this.playerService.get(message.guild!.id)
 
-        const wasPlayingSong = this.player.queue.getCurrent() !== null
+        const wasPlayingSong = this.queue.getCurrent() !== null
 
         if (args.length === 0) {
             if (this.player.status === STATUS.PLAYING) {
@@ -77,38 +81,27 @@ export default class extends Command {
             args[args.length - 1] === 'immediate'
         this.channelId = message.channel.id
 
-        const [provider, url] = PlayerProviderResolver.resolve(args[0])
+        const results = await PlayerProviderFactory.create(args[0])
 
-        switch (provider) {
-            case PlayerProvider.SPOTIFY_PLAYLIST:
-                await this.handleSpotifyPlaylist(url.toString())
-                break
-            case PlayerProvider.SPOTIFY_TRACK:
-                await this.handleSpotifyPlaylist(url.toString())
-                break
-            case PlayerProvider.YOUTUBE_PLAYLIST:
-                await this.handleYoutubePlaylist(url as URL)
-                break
-            case PlayerProvider.YOUTUBE_SINGLE_TRACK:
-                await this.handleYoutubeSingleTrack(url as URL)
-                break
-            case PlayerProvider.YOUTUBE_SEARCH:
-                await this.handleYoutubeSearch(url as string, args)
-                break
+        for (const song of results) {
+            this.queue.add(
+                { ...song, channelId: this.channelId },
+                this.addToFrontOfQueue
+            )
         }
 
-        //LoggerUtil.debug('Queue!', { info: this.player.queue.getQueue() })
-        if (this.player.queue.isEmpty()) {
-            console.log('No songs found!')
-            LoggerUtil.debug('songs is empty', { info: this.player.queue })
+        console.log(this.queue)
+
+        if (this.queue.isEmpty()) {
+            LoggerUtil.debug('No Songs found!', { info: this.queue })
             throw new NoSongsFoundError()
         }
 
-        const firstSong = this.player.queue.get(0)
+        const firstSong = this.queue.get(0)
 
         let statusMsg = ''
 
-        if (this.player.voiceConnection === null) {
+        if (!this.player.isConnected()) {
             await this.player.connect(targetVoiceChannel)
 
             // Resume / start playback
@@ -120,7 +113,7 @@ export default class extends Command {
         }
 
         // Build response message
-        //     if (this.player.queue.size() > 0) {
+        //     if (this.queue.size() > 0) {
         //         await message.channel.send(
         //             `**${firstSong.title}** added to the${
         //                 this.addToFrontOfQueue ? ' front of the' : ''
@@ -131,57 +124,8 @@ export default class extends Command {
         //
         //     await message.channel.send(
         //         `**${firstSong.title}** and ${
-        //             this.player.queue.size() - 1
+        //             this.queue.size() - 1
         //         } other songs were added to the queue`
         //     )
-    }
-
-    private async handleSpotifyPlaylist(url: string) {
-        console.log(url)
-        const [convertedSongs, nSongsNotFound, totalSongs] =
-            await this.getSongs.spotifySource(url, Config.playlistLimit)
-
-        for (const song of convertedSongs) {
-            this.player.queue.add(
-                { ...song, addedInChannelId: this.channelId },
-                true
-            )
-        }
-    }
-
-    private async handleYoutubePlaylist(url: URL) {
-        const songs = await this.getSongs.youtubePlaylist(
-            url.searchParams.get('list')!
-        )
-
-        for (const song of songs) {
-            this.player.queue.add(song as QueuedSong)
-        }
-    }
-
-    private async handleYoutubeSingleTrack(url: URL) {
-        const song = await this.getSongs.youtubeVideo(url.href)
-
-        if (!song) {
-            throw new MusicNotFoundError()
-        }
-
-        console.log('Addding yt single', song as QueuedSong)
-        this.player.queue.add(song as QueuedSong)
-    }
-
-    private async handleYoutubeSearch(url: string, args: string[]) {
-        // Not a URL, must search YouTube
-        const query = this.addToFrontOfQueue
-            ? args.slice(0, args.length - 1).join(' ')
-            : args.join(' ')
-
-        const song = await this.getSongs.youtubeVideoSearch(query)
-
-        if (!song) {
-            throw new MusicNotFoundError()
-        }
-
-        this.player.queue.add(song as QueuedSong)
     }
 }

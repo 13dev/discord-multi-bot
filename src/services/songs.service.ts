@@ -13,9 +13,9 @@ import { Inject, Service } from 'typedi'
 import { Config } from '@src/config'
 import YoutubeAdapter from '@src/adapters/youtube.adapter'
 import SpotifyAdapter from '@src/adapters/spotify.adapter'
-import { QueuedPlaylist, QueuedSong } from '@src/player-queue'
+import { QueuedPlaylist, QueuedSong } from '@src/queue'
 
-type QueuedSongWithoutChannel = Except<QueuedSong, 'addedInChannelId'>
+type QueuedSongWithoutChannel = Except<QueuedSong, 'channelId'>
 
 const ONE_HOUR_IN_SECONDS = 60 * 60
 const ONE_MINUTE_IN_SECONDS = 1 * 60

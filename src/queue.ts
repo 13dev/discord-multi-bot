@@ -14,13 +14,13 @@ export interface QueuedSong {
     length: number
     playlist: QueuedPlaylist | null
     isLive: boolean
-    addedInChannelId: Snowflake
+    channelId: Snowflake
 }
 
-type QueuedSongWithoutChannel = Except<QueuedSong, 'addedInChannelId'>
+type QueuedSongWithoutChannel = Except<QueuedSong, 'channelId'>
 
 @Service()
-export class PlayerQueue {
+export class Queue {
     private queue: QueuedSong[] = []
     private _position = 0
 

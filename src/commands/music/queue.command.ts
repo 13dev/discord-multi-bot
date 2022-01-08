@@ -2,7 +2,7 @@ import { Inject, Service } from 'typedi'
 import { Command, CommandOptions } from '@src/command'
 import { Message, MessageEmbed } from 'discord.js'
 import PlayerService from '@services/player.service'
-import { PlayerQueue } from '@src/player-queue'
+import { Queue } from '@src/queue'
 import { STATUS } from '@src/player'
 import { toTime } from '@utils/time.util'
 const PAGE_SIZE = 10
@@ -13,7 +13,7 @@ export default class extends Command {
     private readonly playerService!: PlayerService
 
     @Inject()
-    private readonly queue!: PlayerQueue
+    private readonly queue!: Queue
 
     get options(): CommandOptions {
         return {
