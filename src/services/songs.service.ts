@@ -61,7 +61,7 @@ export default class GetSongsService {
 
     async youtubeVideo(url: string): Promise<QueuedSongWithoutChannel | null> {
         try {
-            const videoDetails = await this.youtubeAdapter.youtube.videos.get(
+            const videoDetails = await this.youtubeAdapter.videos.get(
                 cleanUrl(url)
             )
 
@@ -80,7 +80,7 @@ export default class GetSongsService {
 
     async youtubePlaylist(listId: string): Promise<QueuedSongWithoutChannel[]> {
         // YouTube playlist
-        const playlist = await this.youtubeAdapter.youtube.playlists.get(listId)
+        const playlist = await this.youtubeAdapter.playlists.get(listId)
 
         interface VideoDetailsResponse {
             id: string
@@ -99,7 +99,7 @@ export default class GetSongsService {
         while (playlistVideos.length !== playlist.contentDetails.itemCount) {
             // eslint-disable-next-line no-await-in-loop
             const { items, nextPageToken } =
-                await this.youtubeAdapter.youtube.playlists.items(listId)
+                await this.youtubeAdapter.playlists.items(listId)
 
             nextToken = nextPageToken
 
@@ -187,8 +187,8 @@ export default class GetSongsService {
                         body: { items },
                     },
                 ] = await Promise.all([
-                    this.spotifyAdapter.spotify.getAlbum(uri.id),
-                    this.spotifyAdapter.spotify.getAlbumTracks(uri.id, {
+                    this.spotifyAdapter.getAlbum(uri.id),
+                    this.spotifyAdapter.getAlbumTracks(uri.id, {
                         limit: 50,
                     }),
                 ])
@@ -204,8 +204,8 @@ export default class GetSongsService {
 
                 let [{ body: playlistResponse }, { body: tracksResponse }] =
                     await Promise.all([
-                        this.spotifyAdapter.spotify.getPlaylist(uri.id),
-                        this.spotifyAdapter.spotify.getPlaylistTracks(uri.id, {
+                        this.spotifyAdapter.getPlaylist(uri.id),
+                        this.spotifyAdapter.getPlaylistTracks(uri.id, {
                             limit: 50,
                         }),
                     ])
@@ -224,23 +224,20 @@ export default class GetSongsService {
                 while (tracksResponse.next) {
                     // eslint-disable-next-line no-await-in-loop
                     ;({ body: tracksResponse } =
-                        await this.spotifyAdapter.spotify.getPlaylistTracks(
-                            uri.id,
-                            {
-                                limit: parseInt(
-                                    new URL(
-                                        tracksResponse.next
-                                    ).searchParams.get('limit') ?? '50',
-                                    10
-                                ),
-                                offset: parseInt(
-                                    new URL(
-                                        tracksResponse.next
-                                    ).searchParams.get('offset') ?? '0',
-                                    10
-                                ),
-                            }
-                        ))
+                        await this.spotifyAdapter.getPlaylistTracks(uri.id, {
+                            limit: parseInt(
+                                new URL(tracksResponse.next).searchParams.get(
+                                    'limit'
+                                ) ?? '50',
+                                10
+                            ),
+                            offset: parseInt(
+                                new URL(tracksResponse.next).searchParams.get(
+                                    'offset'
+                                ) ?? '0',
+                                10
+                            ),
+                        }))
 
                     tracks.push(
                         ...tracksResponse.items.map(
@@ -255,9 +252,7 @@ export default class GetSongsService {
             case 'track': {
                 const uri = parsed as spotifyURI.Track
 
-                const { body } = await this.spotifyAdapter.spotify.getTrack(
-                    uri.id
-                )
+                const { body } = await this.spotifyAdapter.getTrack(uri.id)
 
                 tracks.push(body)
                 break
@@ -266,11 +261,10 @@ export default class GetSongsService {
             case 'artist': {
                 const uri = parsed as spotifyURI.Artist
 
-                const { body } =
-                    await this.spotifyAdapter.spotify.getArtistTopTracks(
-                        uri.id,
-                        'US'
-                    )
+                const { body } = await this.spotifyAdapter.getArtistTopTracks(
+                    uri.id,
+                    'US'
+                )
 
                 tracks.push(...body.tracks)
                 break

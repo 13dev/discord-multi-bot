@@ -47,4 +47,15 @@ export class Config {
             'www.music.youtube.com',
         ],
     }
+
+    public static readonly ffmpeg = {
+        initOptions: [
+            '-reconnect',
+            '1',
+            '-reconnect_streamed',
+            '1',
+            '-reconnect_delay_max',
+            '5',
+        ],
+    }
 }

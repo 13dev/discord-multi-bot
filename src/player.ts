@@ -20,6 +20,7 @@ import { Inject, Service } from 'typedi'
 import { path } from '@ffmpeg-installer/ffmpeg'
 import DiscordClient from '@src/adapters/discord.adapter'
 import { Queue, QueuedSong } from '@src/queue'
+import { FfmpegAdapter } from '@src/adapters/ffmpeg.adapter'
 
 export enum STATUS {
     PLAYING,
@@ -42,9 +43,8 @@ export class Player {
     @Inject()
     private readonly queue!: Queue
 
-    constructor() {
-        ffmpeg.setFfmpegPath(path)
-    }
+    @Inject()
+    private readonly ffmpegAdapter!: FfmpegAdapter
 
     public isConnected(): boolean {
         return this.voiceConnection instanceof VoiceConnection
@@ -251,8 +251,6 @@ export class Player {
         url: string,
         options: { seek?: number } = {}
     ): Promise<Readable> {
-        let ffmpegInput = ''
-        const ffmpegInputOptions: string[] = []
         let shouldCacheVideo = false
 
         let format: ytdl.videoFormat | undefined
@@ -318,8 +316,6 @@ export class Player {
             }
         }
 
-        ffmpegInput = format.url
-
         // Don't cache livestreams or long videos
         const MAX_CACHE_LENGTH_SECONDS = 30 * 60 // 30 minutes
         shouldCacheVideo =
@@ -328,52 +324,13 @@ export class Player {
                 MAX_CACHE_LENGTH_SECONDS &&
             !options.seek
 
-        ffmpegInputOptions.push(
-            ...[
-                '-reconnect',
-                '1',
-                '-reconnect_streamed',
-                '1',
-                '-reconnect_delay_max',
-                '5',
-            ]
-        )
-
         if (options.seek) {
             // Fudge seek position since FFMPEG doesn't do a great job
-            ffmpegInputOptions.push('-ss', (options.seek + 7).toString())
+            this.ffmpegAdapter.pushOptions('-ss', (options.seek + 7).toString())
         }
-        //}
 
         // Create stream and pipe to capacitor
-        return new Promise((resolve, reject) => {
-            const capacitor = new WriteStream()
-
-            // Cache video if necessary
-            // if (shouldCacheVideo) {
-            //     const cacheStream = this.fileCache.createWriteStream(
-            //         this.getHashForCache(url)
-            //     )
-            //
-            //     capacitor.createReadStream().pipe(cacheStream)
-            // } else {
-            ffmpegInputOptions.push('-re')
-            //}
-
-            const youtubeStream = ffmpeg(ffmpegInput)
-                .inputOptions(ffmpegInputOptions)
-                .noVideo()
-                .audioCodec('libopus')
-                .outputFormat('webm')
-                .on('error', (error) => {
-                    console.error(error)
-                    reject(error)
-                })
-
-            youtubeStream.pipe(capacitor)
-
-            resolve(capacitor.createReadStream())
-        })
+        return this.ffmpegAdapter.createYoutubeStream(format.url)
     }
 
     private startTrackingPosition(initalPosition?: number): void {

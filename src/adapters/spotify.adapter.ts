@@ -3,12 +3,11 @@ import SpotifyWebApi from 'spotify-web-api-node'
 import { Config } from '@src/config'
 
 @Service()
-export default class SpotifyAdapter {
-    readonly spotify: SpotifyWebApi
+export default class SpotifyAdapter extends SpotifyWebApi {
     private spotifyTokenTimerId?: NodeJS.Timeout
 
     constructor() {
-        this.spotify = new SpotifyWebApi(Config.spotify)
+        super(Config.spotify)
         void this.refreshSpotifyToken()
     }
 
@@ -19,8 +18,8 @@ export default class SpotifyAdapter {
     }
 
     private async refreshSpotifyToken() {
-        const auth = await this.spotify.clientCredentialsGrant()
-        this.spotify.setAccessToken(auth.body.access_token)
+        const auth = await this.clientCredentialsGrant()
+        this.setAccessToken(auth.body.access_token)
 
         this.spotifyTokenTimerId = setTimeout(
             this.refreshSpotifyToken.bind(this),
