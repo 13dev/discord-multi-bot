@@ -77,14 +77,11 @@ export default class extends Command {
 
             this.queue
                 .toArray()
+                .splice(1)
                 .slice(queuePageBegin, queuePageEnd)
                 .forEach((song, i) => {
                     embed.addField(
-                        `${(
-                            i +
-                            1 +
-                            queuePageBegin
-                        ).toString()}/${queueSize.toString()}`,
+                        `${i + 1 + queuePageBegin}/${queueSize - 1}`,
                         song.title,
                         false
                     )
