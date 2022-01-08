@@ -36,6 +36,7 @@
     "moment": "^2.29.1",
     "node-recursive-directory": "^1.2.0",
     "p-queue": "^6.6.2",
+    "queue-typescript": "^1.0.1",
     "reflect-metadata": "^0.1.13",
     "spotify-uri": "^2.2.0",
     "spotify-web-api-node": "^5.0.2",

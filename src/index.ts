@@ -8,9 +8,13 @@ import lotteryLoader from '@loaders/lottery.loader'
 import commandLoader from '@loaders/command.loader'
 import { USER } from '@utils/consts.util'
 import discordLoader from '@loaders/discord.loader'
-;(async () => {
+import { Queue } from 'queue-typescript'
+import { QueuedSong } from '@src/types'
+
+async function bootstrap() {
     //TODO: Remove this.
     Container2.set(USER, 0)
+    Container2.set('queue', new Queue<QueuedSong>())
 
     await useContainer(Container)
     await typeormLoader()
@@ -19,4 +23,6 @@ import discordLoader from '@loaders/discord.loader'
     await commandLoader()
 
     console.log('Bot is now running')
-})()
+}
+
+bootstrap()

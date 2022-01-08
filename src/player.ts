@@ -16,10 +16,11 @@ import {
 } from '@discordjs/voice'
 import { Inject, Service } from 'typedi'
 import DiscordClient from '@src/adapters/discord.adapter'
-import { Queue, QueuedSong } from '@src/queue'
 import { FfmpegAdapter } from '@src/adapters/ffmpeg.adapter'
 import YoutubeAdapter from '@src/adapters/youtube.adapter'
 import { Config } from '@src/config'
+import { Queue } from 'queue-typescript'
+import { QueuedSong } from '@src/types'
 
 export enum STATUS {
     PLAYING,
@@ -30,8 +31,8 @@ export class Player {
     @Inject()
     private readonly discordClient!: DiscordClient
 
-    @Inject()
-    private readonly queue!: Queue
+    @Inject('queue')
+    private readonly queue!: Queue<QueuedSong>
 
     @Inject()
     private readonly ffmpegAdapter!: FfmpegAdapter
@@ -83,7 +84,7 @@ export class Player {
             throw new Error('Not connected to a voice channel.')
         }
 
-        const currentSong = this.queue.getCurrent()
+        const currentSong = this.queue.front
 
         if (!currentSong) {
             throw new Error('No song currently playing')
@@ -123,7 +124,7 @@ export class Player {
             throw new Error('Not connected to a voice channel.')
         }
 
-        const currentSong = this.queue.getCurrent()
+        const currentSong = this.queue.front
 
         if (!currentSong) {
             throw new Error('Queue empty.')
@@ -174,7 +175,7 @@ export class Player {
             this.lastSongURL = currentSong.url
         } catch (error: unknown) {
             console.log(error)
-            const currentSong = this.queue.getCurrent()
+            const currentSong = this.queue.front
             await this.forward(1)
 
             if (
@@ -215,7 +216,7 @@ export class Player {
         this.manualForward(skip)
 
         try {
-            if (this.queue.getCurrent() && this.status !== STATUS.PAUSED) {
+            if (this.queue.front && this.status !== STATUS.PAUSED) {
                 await this.play()
                 return
             }
@@ -223,25 +224,21 @@ export class Player {
             this.status = STATUS.PAUSED
             this.disconnect()
         } catch (error: unknown) {
-            this.queue.position--
+            // this.queue.position--
             throw error
         }
     }
 
     manualForward(skip: number): void {
-        if (this.queue.position + skip - 1 < this.queue.size()) {
-            this.queue.position += skip
-            this.positionInSeconds = 0
-            this.stopTrackingPosition()
-            return
+        if (this.queue.length < skip) {
+            throw new Error('No songs in queue to forward to.')
         }
 
-        throw new Error('No songs in queue to forward to.')
+        Array.from({ length: skip }, () => this.queue.dequeue())
     }
 
     async back(): Promise<void> {
-        if (this.queue.position - 1 >= 0) {
-            this.queue.position--
+        if (this.queue.length - 1 >= 0) {
             this.positionInSeconds = 0
             this.stopTrackingPosition()
 

@@ -1,21 +1,17 @@
 import { URL } from 'url'
-import { toSeconds, parse } from 'iso8601-duration'
+import { parse, toSeconds } from 'iso8601-duration'
 import got from 'got'
 import ytsr, { Video } from 'ytsr'
 import spotifyURI from 'spotify-uri'
-import Spotify from 'spotify-web-api-node'
-import YouTube, { YoutubePlaylistItem } from 'youtube.ts'
+import { YoutubePlaylistItem } from 'youtube.ts'
 import PQueue from 'p-queue'
 import shuffle from 'array-shuffle'
-import { Except } from 'type-fest'
 import { cleanUrl } from '@utils/url.util'
 import { Inject, Service } from 'typedi'
 import { Config } from '@src/config'
 import YoutubeAdapter from '@src/adapters/youtube.adapter'
 import SpotifyAdapter from '@src/adapters/spotify.adapter'
-import { QueuedPlaylist, QueuedSong } from '@src/queue'
-
-type QueuedSongWithoutChannel = Except<QueuedSong, 'channelId'>
+import { QueuedPlaylist, QueuedSongWithoutChannel } from '@src/types'
 
 const ONE_HOUR_IN_SECONDS = 60 * 60
 const ONE_MINUTE_IN_SECONDS = 1 * 60
