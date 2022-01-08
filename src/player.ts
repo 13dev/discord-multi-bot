@@ -220,7 +220,7 @@ export class Player {
     }
 
     manualForward(skip: number): void {
-        if (this._queue.position + skip - 1 < this._queue.getQueue().length) {
+        if (this._queue.position + skip - 1 < this._queue.size()) {
             this._queue.position += skip
             this.positionInSeconds = 0
             this.stopTrackingPosition()

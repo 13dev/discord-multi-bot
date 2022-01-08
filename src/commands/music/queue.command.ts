@@ -74,20 +74,20 @@ export default class extends Command {
             const queuePageBegin = (queuePage - 1) * PAGE_SIZE
             const queuePageEnd = queuePageBegin + PAGE_SIZE
 
-            this.queue
-                .getQueue()
-                .slice(queuePageBegin, queuePageEnd)
-                .forEach((song, i) => {
-                    embed.addField(
-                        `${(
-                            i +
-                            1 +
-                            queuePageBegin
-                        ).toString()}/${queueSize.toString()}`,
-                        song.title,
-                        false
-                    )
-                })
+            // this.queue
+            //     .
+            //     .slice(queuePageBegin, queuePageEnd)
+            //     .forEach((song, i) => {
+            //         embed.addField(
+            //             `${(
+            //                 i +
+            //                 1 +
+            //                 queuePageBegin
+            //             ).toString()}/${queueSize.toString()}`,
+            //             song.title,
+            //             false
+            //         )
+            //     })
 
             embed.addField('Page', `${queuePage} out of ${maxQueuePage}`, false)
 

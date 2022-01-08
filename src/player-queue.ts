@@ -65,16 +65,12 @@ export class PlayerQueue {
         ]
     }
 
-    /**
-     * Returns queue, not including the current song.
-     * @returns {QueuedSong[]}
-     */
-    public getQueue(): QueuedSong[] {
-        return this.queue.slice(this._position + 1)
+    public size(): number {
+        return this.queue.length
     }
 
-    public size(): number {
-        return this.getQueue().length
+    public get(index: number): QueuedSong {
+        return this.queue[index]
     }
 
     public isEmpty(): boolean {

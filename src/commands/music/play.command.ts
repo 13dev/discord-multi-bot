@@ -20,6 +20,7 @@ import {
     PlayerProvider,
 } from '@src/resolvers/player-provider.resolver'
 import { PlayerQueue, QueuedSong } from '@src/player-queue'
+import { LoggerUtil } from '@utils/logger.util'
 
 @Service()
 export default class extends Command {
@@ -76,8 +77,6 @@ export default class extends Command {
             args[args.length - 1] === 'immediate'
         this.channelId = message.channel.id
 
-        let extraMsg = ''
-
         const [provider, url] = PlayerProviderResolver.resolve(args[0])
 
         switch (provider) {
@@ -98,13 +97,14 @@ export default class extends Command {
                 break
         }
 
-        console.log(this.player.queue.size())
+        //LoggerUtil.debug('Queue!', { info: this.player.queue.getQueue() })
+        if (this.player.queue.isEmpty()) {
+            console.log('No songs found!')
+            LoggerUtil.debug('songs is empty', { info: this.player.queue })
+            throw new NoSongsFoundError()
+        }
 
-        // if (this.player.queue.isEmpty()) {
-        //     throw new NoSongsFoundError()
-        // }
-
-        const firstSong = this.player.queue.getQueue()[0]
+        const firstSong = this.player.queue.get(0)
 
         let statusMsg = ''
 
@@ -120,32 +120,20 @@ export default class extends Command {
         }
 
         // Build response message
-        if (statusMsg !== '') {
-            if (extraMsg === '') {
-                extraMsg = statusMsg
-            } else {
-                extraMsg = `${statusMsg}, ${extraMsg}`
-            }
-        }
-
-        if (extraMsg !== '') {
-            extraMsg = ` (${extraMsg})`
-        }
-
-        if (this.player.queue.size() > 0) {
-            await message.channel.send(
-                `**${firstSong.title}** added to the${
-                    this.addToFrontOfQueue ? ' front of the' : ''
-                } queue${extraMsg}`
-            )
-            return
-        }
-
-        await message.channel.send(
-            `**${firstSong.title}** and ${
-                this.player.queue.size() - 1
-            } other songs were added to the queue${extraMsg}`
-        )
+        //     if (this.player.queue.size() > 0) {
+        //         await message.channel.send(
+        //             `**${firstSong.title}** added to the${
+        //                 this.addToFrontOfQueue ? ' front of the' : ''
+        //             } queue`
+        //         )
+        //         return
+        //     }
+        //
+        //     await message.channel.send(
+        //         `**${firstSong.title}** and ${
+        //             this.player.queue.size() - 1
+        //         } other songs were added to the queue`
+        //     )
     }
 
     private async handleSpotifyPlaylist(url: string) {
@@ -156,7 +144,7 @@ export default class extends Command {
         for (const song of convertedSongs) {
             this.player.queue.add(
                 { ...song, addedInChannelId: this.channelId },
-                this.addToFrontOfQueue
+                true
             )
         }
     }
@@ -179,11 +167,7 @@ export default class extends Command {
         }
 
         console.log('Addding yt single', song as QueuedSong)
-
-        console.log(this.player.queue)
         this.player.queue.add(song as QueuedSong)
-
-        console.log(this.player.queue)
     }
 
     private async handleYoutubeSearch(url: string, args: string[]) {
