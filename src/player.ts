@@ -1,9 +1,7 @@
-import { VoiceChannel, Snowflake, TextChannel } from 'discord.js'
+import { TextChannel, VoiceChannel } from 'discord.js'
 import { Readable } from 'stream'
 import hasha from 'hasha'
-import ytdl from 'ytdl-core'
-import { WriteStream } from 'fs-capacitor'
-import ffmpeg from 'fluent-ffmpeg'
+import ytdl, { getInfo } from 'ytdl-core'
 
 import {
     AudioPlayer,
@@ -17,10 +15,10 @@ import {
     VoiceConnectionStatus,
 } from '@discordjs/voice'
 import { Inject, Service } from 'typedi'
-import { path } from '@ffmpeg-installer/ffmpeg'
 import DiscordClient from '@src/adapters/discord.adapter'
 import { Queue, QueuedSong } from '@src/queue'
 import { FfmpegAdapter } from '@src/adapters/ffmpeg.adapter'
+import YoutubeAdapter from '@src/adapters/youtube.adapter'
 
 export enum STATUS {
     PLAYING,
@@ -46,6 +44,9 @@ export class Player {
     @Inject()
     private readonly ffmpegAdapter!: FfmpegAdapter
 
+    @Inject()
+    private readonly youtubeAdapter!: YoutubeAdapter
+
     public isConnected(): boolean {
         return this.voiceConnection instanceof VoiceConnection
     }
@@ -56,6 +57,8 @@ export class Player {
             guildId: channel.guild.id,
             adapterCreator: channel.guild
                 .voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
+            selfDeaf: true,
+            selfMute: false,
         })
     }
 
@@ -145,8 +148,12 @@ export class Player {
 
         try {
             const stream = await this.getStream(currentSong.url)
+
             this.audioPlayer = createAudioPlayer()
             this.voiceConnection.subscribe(this.audioPlayer)
+
+            const createAudio()
+
             this.audioPlayer.play(
                 createAudioResource(stream, {
                     inputType: StreamType.WebmOpus,
@@ -166,6 +173,7 @@ export class Player {
                 this.lastSongURL = currentSong.url
             }
         } catch (error: unknown) {
+            console.log(error)
             const currentSong = this.queue.getCurrent()
             await this.forward(1)
 
@@ -253,68 +261,11 @@ export class Player {
     ): Promise<Readable> {
         let shouldCacheVideo = false
 
-        let format: ytdl.videoFormat | undefined
+        // TODO: CACHE, do not download if is it on cache.
+        // Not cached
 
-        // try {
-        //     // ffmpegInput = await this.fileCache.getPathFor(
-        //     //     this.getHashForCache(url)
-        //     // )
-        //
-        //     if (options.seek) {
-        //         ffmpegInputOptions.push('-ss', options.seek.toString())
-        //     }
-        // } catch {
-        // Not yet cached, must download
-        const info = await ytdl.getInfo(url)
-
-        const { formats } = info
-
-        const filter = (format: ytdl.videoFormat): boolean =>
-            format.codecs === 'opus' &&
-            format.container === 'webm' &&
-            format.audioSampleRate !== undefined &&
-            parseInt(format.audioSampleRate, 10) === 48000
-
-        format = formats.find(filter)
-
-        const nextBestFormat = (
-            formats: ytdl.videoFormat[]
-        ): ytdl.videoFormat | undefined => {
-            if (formats[0].isLive) {
-                formats = formats.sort(
-                    (a, b) =>
-                        (b as unknown as { audioBitrate: number })
-                            .audioBitrate -
-                        (a as unknown as { audioBitrate: number }).audioBitrate
-                ) // Bad typings
-
-                return formats.find((format) =>
-                    [128, 127, 120, 96, 95, 94, 93].includes(
-                        parseInt(format.itag as unknown as string, 10)
-                    )
-                ) // Bad typings
-            }
-
-            formats = formats
-                .filter((format) => format.averageBitrate)
-                .sort((a, b) => {
-                    if (a && b) {
-                        return b.averageBitrate! - a.averageBitrate!
-                    }
-
-                    return 0
-                })
-            return formats.find((format) => !format.bitrate) ?? formats[0]
-        }
-
-        if (!format) {
-            format = nextBestFormat(info.formats)
-
-            if (!format) {
-                // If still no format is found, throw
-                throw new Error("Can't find suitable format.")
-            }
-        }
+        const info = await getInfo(url)
+        const format = this.youtubeAdapter.chooseNextBestFormat(info.formats)
 
         // Don't cache livestreams or long videos
         const MAX_CACHE_LENGTH_SECONDS = 30 * 60 // 30 minutes
@@ -326,7 +277,7 @@ export class Player {
 
         if (options.seek) {
             // Fudge seek position since FFMPEG doesn't do a great job
-            this.ffmpegAdapter.pushOptions('-ss', (options.seek + 7).toString())
+            //this.ffmpegAdapter.pushOptions('-ss', (options.seek + 7).toString())
         }
 
         // Create stream and pipe to capacitor
@@ -385,7 +336,7 @@ export class Player {
     }
 
     private async onAudioPlayerStateChange(
-        _oldState: { status: AudioPlayerStatus },
+        oldState: { status: AudioPlayerStatus },
         newState: { status: AudioPlayerStatus }
     ): Promise<void> {
         // Automatically advance queued song at end

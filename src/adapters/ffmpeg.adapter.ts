@@ -4,6 +4,8 @@ import { Service } from 'typedi'
 import { Config } from '@src/config'
 import { ReadStream, WriteStream } from 'fs-capacitor'
 import { LoggerUtil } from '@utils/logger.util'
+import { Readable } from 'stream'
+import ytdl from 'ytdl-core'
 
 @Service()
 export class FfmpegAdapter {
@@ -18,7 +20,13 @@ export class FfmpegAdapter {
         this.options.push(...options)
     }
 
-    public async createYoutubeStream(input: string): Promise<ReadStream> {
+    public async createYoutubeStream(input: string): Promise<Readable> {
+        // return ytdl(input, {
+        //     filter: 'audioonly',
+        //     quality: 'highest',
+        //     highWaterMark: 32 * 1024 * 1024,
+        // })
+
         return new Promise((resolve, reject) => {
             const capacitor = new WriteStream()
 
@@ -38,6 +46,7 @@ export class FfmpegAdapter {
                 .noVideo()
                 .audioCodec('libopus')
                 .outputFormat('webm')
+                .withAudioQuality(0)
                 .on('error', (error) => {
                     LoggerUtil.error(error)
                     reject(error)
