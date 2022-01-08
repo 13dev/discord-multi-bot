@@ -80,13 +80,15 @@ export default class extends Command {
         const results = await PlayerProviderFactory.create(args[0])
 
         for (const song of results) {
-            console.log('adding a song', song.title)
-            if (this.addToFrontOfQueue) {
-                this.queue.prepend({ ...song, channelId: this.channelId })
-                continue
-            }
+            const queueSong = { ...song, channelId: this.channelId }
 
-            this.queue.enqueue({ ...song, channelId: this.channelId })
+            LoggerUtil.debug('Adding song to the queue.', { song: song.title })
+
+            this.addToFrontOfQueue
+                ? this.queue.prepend(queueSong)
+                : this.queue.enqueue(queueSong)
+
+
         }
 
         if (!this.queue.length) {
@@ -106,9 +108,10 @@ export default class extends Command {
             }
         }
 
-        const firstSong = this.queue.front
+        const firstSong = this.queue.tail
 
-        if (this.queue.length) {
+        // Single track added
+        if (results.length == 1) {
             if (this.addToFrontOfQueue) {
                 await message.channel.send(
                     `**${firstSong.title}** Added to the front of the queue.`
@@ -122,8 +125,9 @@ export default class extends Command {
             return
         }
 
+        // Playlist added
         await message.channel.send(
-            `**${firstSong.title}** and ${this.queue.length} other songs were added to the queue`
+            `**${results[0].title}** and ${this.queue.length} other songs were added to the queue`
         )
     }
 }
