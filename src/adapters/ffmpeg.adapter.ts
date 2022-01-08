@@ -19,7 +19,7 @@ export class FfmpegAdapter {
         this.options.push(...options)
     }
 
-    public async createYoutubeStream(input: string): Promise<Readable> {
+    public async createStream(input: string): Promise<Readable> {
         return new Promise((resolve, reject) => {
             const capacitor = new WriteStream()
 
@@ -34,7 +34,7 @@ export class FfmpegAdapter {
             //this.pushOptions('-re')
             //}
 
-            const youtubeStream = ffmpeg(input)
+            const stream = ffmpeg(input)
                 .inputOptions(...this.options)
                 .noVideo()
                 .audioCodec('libopus')
@@ -44,7 +44,7 @@ export class FfmpegAdapter {
                     reject(error)
                 })
 
-            youtubeStream.pipe(capacitor)
+            stream.pipe(capacitor)
 
             resolve(capacitor.createReadStream())
         })

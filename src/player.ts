@@ -272,7 +272,7 @@ export class Player {
         }
 
         // Create stream and pipe to capacitor
-        return this.ffmpegAdapter.createYoutubeStream(format.url)
+        return this.ffmpegAdapter.createStream(format.url)
     }
 
     private shouldCacheVideo(info: videoInfo, seek: number) {
