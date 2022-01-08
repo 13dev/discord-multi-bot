@@ -8,6 +8,7 @@ export class Config {
     public static readonly cache = {
         dir: 'cache',
         limitBytes: 1000000,
+        maxCacheLengthSeconds: 30 * 60, // 30 minutes
     }
     public static readonly playlistLimit = 20
 
@@ -56,6 +57,18 @@ export class Config {
             '1',
             '-reconnect_delay_max',
             '5',
+            '-loglevel',
+            '0',
+
+            // no lag
+            '-analyzeduration',
+            '0',
+            '-probesize',
+            '32',
+            '-flags',
+            'low_delay',
+            '-fflags',
+            'nobuffer',
         ],
     }
 }

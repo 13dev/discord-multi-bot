@@ -2,10 +2,9 @@ import ffmpeg from 'fluent-ffmpeg'
 import { path } from '@ffmpeg-installer/ffmpeg'
 import { Service } from 'typedi'
 import { Config } from '@src/config'
-import { ReadStream, WriteStream } from 'fs-capacitor'
+import { WriteStream } from 'fs-capacitor'
 import { LoggerUtil } from '@utils/logger.util'
 import { Readable } from 'stream'
-import ytdl from 'ytdl-core'
 
 @Service()
 export class FfmpegAdapter {
@@ -21,16 +20,10 @@ export class FfmpegAdapter {
     }
 
     public async createYoutubeStream(input: string): Promise<Readable> {
-        // return ytdl(input, {
-        //     filter: 'audioonly',
-        //     quality: 'highest',
-        //     highWaterMark: 32 * 1024 * 1024,
-        // })
-
         return new Promise((resolve, reject) => {
             const capacitor = new WriteStream()
 
-            // Cache video if necessary
+            // TODO: Cache video if necessary
             // if (shouldCacheVideo) {
             //     const cacheStream = this.fileCache.createWriteStream(
             //         this.getHashForCache(url)
@@ -38,7 +31,7 @@ export class FfmpegAdapter {
             //
             //     capacitor.createReadStream().pipe(cacheStream)
             // } else {
-            this.pushOptions('-re')
+            //this.pushOptions('-re')
             //}
 
             const youtubeStream = ffmpeg(input)
@@ -46,7 +39,6 @@ export class FfmpegAdapter {
                 .noVideo()
                 .audioCodec('libopus')
                 .outputFormat('webm')
-                .withAudioQuality(0)
                 .on('error', (error) => {
                     LoggerUtil.error(error)
                     reject(error)

@@ -90,8 +90,6 @@ export default class extends Command {
             )
         }
 
-        console.log(this.queue)
-
         if (this.queue.isEmpty()) {
             LoggerUtil.debug('No Songs found!', { info: this.queue })
             throw new NoSongsFoundError()
