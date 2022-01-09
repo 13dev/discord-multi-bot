@@ -9,7 +9,9 @@ const getFiles = require('node-recursive-directory')
  * Loads all classes in 'commands' directory, works with only one level deep.
  */
 export default async function commandLoader() {
-    ;(await getFiles('src/commands', true)).map(async (file: any) => {
+    const files = await getFiles('src/commands', true)
+
+    files.map(async (file: any) => {
         // Ignore the root directory
         const dir = file.dirname === 'commands' ? '' : file.dirname + '/'
 

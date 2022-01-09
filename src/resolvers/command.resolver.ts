@@ -1,13 +1,18 @@
-import {Command} from '@src/command'
+import { Command } from '@src/command'
 
 export default class CommandResolver {
-    static commandNames: { [index: string]: Command } = {}
+    static commandNames: Map<string[], Command> = new Map<string[], Command>()
 
     public static resolve(command: string): Command | undefined {
-        return this.commandNames[command]
+        for (const [alias, commandInstance] of this.commandNames) {
+            if (alias.includes(command)) {
+                return commandInstance
+            }
+        }
+        return
     }
 
-    public static add(index: string, command: Command) {
-        this.commandNames[index] = command
+    public static add(index: string[], command: Command) {
+        this.commandNames.set(index, command)
     }
 }

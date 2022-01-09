@@ -27,7 +27,7 @@ export default class extends Command {
 
     get options(): CommandOptions {
         return {
-            name: 'lottery close',
+            name: ['lottery close'],
             signature: {
                 command: 'lottery close',
                 arguments: ['limit'],

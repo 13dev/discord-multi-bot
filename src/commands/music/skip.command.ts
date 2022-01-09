@@ -10,7 +10,7 @@ export default class extends Command {
 
     get options(): CommandOptions {
         return {
-            name: 'skip',
+            name: ['skip', 's'],
             signature: {
                 command: 'skip',
             },
@@ -23,7 +23,7 @@ export default class extends Command {
     public async run(message: Message, args: string[]): Promise<void> {
         let tracksToSkip = 1
 
-        if (args.length && Number(args[0]) > tracksToSkip) {
+        if (args.length) {
             tracksToSkip = Number(args[0])
         }
 
