@@ -35,7 +35,7 @@ export default class extends Command {
 
         const currentlyPlaying = this.queue.front
 
-        if (currentlyPlaying) {
+        if (this.queue.length > 1) {
             const queueSize = this.queue.length
             const queuePage = args[0] ? parseInt(args[0], 10) : 1
 
@@ -65,7 +65,7 @@ export default class extends Command {
                 toTime(currentlyPlaying.length)
             description += ' '
             description += ' 🔉'
-            description += this.queue.length === 0 ? '' : '\n\n**Next up:**'
+            description += this.queue.length === 1 ? '' : '\n\n**Next up:**'
 
             embed.setDescription(description)
 
@@ -99,8 +99,9 @@ export default class extends Command {
             embed.addField('Page', `${queuePage} out of ${maxQueuePage}`, false)
 
             await message.channel.send({ embeds: [embed] })
-        } else {
-            await message.channel.send('queue empty')
+            return
         }
+
+        await message.channel.send('queue empty')
     }
 }
