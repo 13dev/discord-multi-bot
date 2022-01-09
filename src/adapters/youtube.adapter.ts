@@ -2,6 +2,7 @@ import Youtube from 'youtube.ts'
 import { Service } from 'typedi'
 import { Config } from '@src/config'
 import { videoFormat } from 'ytdl-core'
+
 type VideoFormat = videoFormat
 type VideoFormats = VideoFormat[]
 
@@ -26,10 +27,10 @@ export default class YoutubeAdapter extends Youtube {
         const bestFormat = formats.find(YoutubeAdapter.findByCodecAndSampleRate)
 
         if (!bestFormat) {
-            const format = this.nextBestFormat(formats)
+            const format = YoutubeAdapter.nextBestFormat(formats)
 
             if (!format) {
-                throw new Error("Can't find suitable format.")
+                throw new Error('Cant find suitable format.')
             }
 
             return format
@@ -38,31 +39,28 @@ export default class YoutubeAdapter extends Youtube {
         return bestFormat
     }
 
-    private nextBestFormat(formats: VideoFormats): VideoFormat | undefined {
+    private static nextBestFormat(formats: VideoFormats): VideoFormat | undefined {
         if (formats[0].isLive) {
-            console.log(formats[0])
             return formats
                 .sort(YoutubeAdapter.sortByAudioBitRate)
-                .find((format) =>
-                    [128, 127, 120, 96, 95, 94, 93].includes(
-                        parseInt(format.itag as unknown as string, 10)
-                    )
-                )
+                .find(YoutubeAdapter.findByLiveStreamItags)
         }
 
         return (
             formats
                 .sort(YoutubeAdapter.sortByAudioBitRate)
                 .filter((format) => format.averageBitrate)
-                .sort((a, b) =>
-                    a && b ? b.averageBitrate! - a.averageBitrate! : 0
-                )
+                .sort(YoutubeAdapter.sortByAverageBitRate)
                 .find((format) => !format.bitrate) ?? formats[0]
         )
     }
 
     private static sortByAudioBitRate(a: VideoFormat, b: VideoFormat) {
         return b.audioBitrate! - a.audioBitrate!
+    }
+
+    private static sortByAverageBitRate(a: VideoFormat, b: VideoFormat) {
+        return a && b ? b.averageBitrate! - a.averageBitrate! : 0
     }
 
     private static findByCodecAndSampleRate(format: VideoFormat) {
@@ -72,5 +70,9 @@ export default class YoutubeAdapter extends Youtube {
             format.audioSampleRate !== undefined &&
             parseInt(format.audioSampleRate, 10) === 48000
         )
+    }
+
+    private static findByLiveStreamItags(format: VideoFormat) {
+        return [128, 127, 120, 96, 95, 94, 93].includes(Number(format.itag))
     }
 }

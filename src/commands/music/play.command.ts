@@ -14,25 +14,18 @@ import {
     NoSongsFoundError,
     NothingToPlayError,
 } from '@src/errors/player.errors'
-import { Config } from '@src/config'
-import {
-    PlayerProviderResolver,
-    PlayerProvider,
-} from '@src/resolvers/player-provider.resolver'
-import { Queue, QueuedSong } from '@src/queue'
 import { LoggerUtil } from '@utils/logger.util'
 import { PlayerProviderFactory } from '@src/factories/player-provider.factory'
+import { Queue } from 'queue-typescript'
+import { QueuedSong } from '@src/types'
 
 @Service()
 export default class extends Command {
     @Inject()
     private readonly playerService!: PlayerService
 
-    @Inject()
-    private readonly getSongs!: GetSongsService
-
-    @Inject()
-    private readonly queue!: Queue
+    @Inject('queue')
+    private readonly queue!: Queue<QueuedSong>
 
     private channelId!: string
     private addToFrontOfQueue: boolean = false
@@ -58,7 +51,7 @@ export default class extends Command {
 
         this.player = this.playerService.get(message.guild!.id)
 
-        const wasPlayingSong = this.queue.getCurrent() !== null
+        const wasPlayingSong = this.queue.front !== null
 
         if (args.length === 0) {
             if (this.player.status === STATUS.PLAYING) {
@@ -84,22 +77,19 @@ export default class extends Command {
         const results = await PlayerProviderFactory.create(args[0])
 
         for (const song of results) {
-            this.queue.add(
-                { ...song, channelId: this.channelId },
-                this.addToFrontOfQueue
-            )
+            const queueSong = { ...song, channelId: this.channelId }
+
+            LoggerUtil.debug('Adding song to the queue.', { song: song.title })
+
+            this.addToFrontOfQueue
+                ? this.queue.prepend(queueSong)
+                : this.queue.enqueue(queueSong)
         }
 
-        console.log(this.queue)
-
-        if (this.queue.isEmpty()) {
+        if (!this.queue.length) {
             LoggerUtil.debug('No Songs found!', { info: this.queue })
             throw new NoSongsFoundError()
         }
-
-        const firstSong = this.queue.get(0)
-
-        let statusMsg = ''
 
         if (!this.player.isConnected()) {
             await this.player.connect(targetVoiceChannel)
@@ -108,24 +98,31 @@ export default class extends Command {
             await this.player.play()
 
             if (wasPlayingSong) {
-                statusMsg = 'resuming playback'
+                await message.channel.send(`Resuming playback.`)
+                return
             }
         }
 
-        // Build response message
-        //     if (this.queue.size() > 0) {
-        //         await message.channel.send(
-        //             `**${firstSong.title}** added to the${
-        //                 this.addToFrontOfQueue ? ' front of the' : ''
-        //             } queue`
-        //         )
-        //         return
-        //     }
-        //
-        //     await message.channel.send(
-        //         `**${firstSong.title}** and ${
-        //             this.queue.size() - 1
-        //         } other songs were added to the queue`
-        //     )
+        const firstSong = this.queue.tail
+
+        // Single track added
+        if (results.length == 1) {
+            if (this.addToFrontOfQueue) {
+                await message.channel.send(
+                    `**${firstSong.title}** Added to the front of the queue.`
+                )
+                return
+            }
+
+            await message.channel.send(
+                `**${firstSong.title}** Added to the queue.`
+            )
+            return
+        }
+
+        // Playlist added
+        await message.channel.send(
+            `**${results[0].title}** and ${this.queue.length} other songs were added to the queue`
+        )
     }
 }

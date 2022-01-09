@@ -2,9 +2,10 @@ import { Inject, Service } from 'typedi'
 import { Command, CommandOptions } from '@src/command'
 import { Message, MessageEmbed } from 'discord.js'
 import PlayerService from '@services/player.service'
-import { Queue } from '@src/queue'
 import { STATUS } from '@src/player'
 import { toTime } from '@utils/time.util'
+import { Queue } from 'queue-typescript'
+import { QueuedSong } from '@src/types'
 const PAGE_SIZE = 10
 
 @Service()
@@ -12,8 +13,8 @@ export default class extends Command {
     @Inject()
     private readonly playerService!: PlayerService
 
-    @Inject()
-    private readonly queue!: Queue
+    @Inject('queue')
+    private readonly queue!: Queue<QueuedSong>
 
     get options(): CommandOptions {
         return {
@@ -31,10 +32,10 @@ export default class extends Command {
     public async run(message: Message, args: string[]): Promise<void> {
         const player = this.playerService.get(message.guild!.id)
 
-        const currentlyPlaying = this.queue.getCurrent()
+        const currentlyPlaying = this.queue.front
 
         if (currentlyPlaying) {
-            const queueSize = this.queue.size()
+            const queueSize = this.queue.length
             const queuePage = args[0] ? parseInt(args[0], 10) : 1
 
             const maxQueuePage = Math.ceil((queueSize + 1) / PAGE_SIZE)
@@ -59,7 +60,7 @@ export default class extends Command {
                 toTime(currentlyPlaying.length)
             description += ' '
             description += ' 🔉'
-            description += this.queue.isEmpty() ? '' : '\n\n**Next up:**'
+            description += this.queue.length === 0 ? '' : '\n\n**Next up:**'
 
             embed.setDescription(description)
 
@@ -74,20 +75,17 @@ export default class extends Command {
             const queuePageBegin = (queuePage - 1) * PAGE_SIZE
             const queuePageEnd = queuePageBegin + PAGE_SIZE
 
-            // this.queue
-            //     .
-            //     .slice(queuePageBegin, queuePageEnd)
-            //     .forEach((song, i) => {
-            //         embed.addField(
-            //             `${(
-            //                 i +
-            //                 1 +
-            //                 queuePageBegin
-            //             ).toString()}/${queueSize.toString()}`,
-            //             song.title,
-            //             false
-            //         )
-            //     })
+            this.queue
+                .toArray()
+                .splice(1)
+                .slice(queuePageBegin, queuePageEnd)
+                .forEach((song, i) => {
+                    embed.addField(
+                        `${i + 1 + queuePageBegin}/${queueSize - 1}`,
+                        song.title,
+                        false
+                    )
+                })
 
             embed.addField('Page', `${queuePage} out of ${maxQueuePage}`, false)
 

@@ -8,6 +8,7 @@ export class Config {
     public static readonly cache = {
         dir: 'cache',
         limitBytes: 1000000,
+        maxCacheLengthSeconds: 30 * 60, // 30 minutes
     }
     public static readonly playlistLimit = 20
 
@@ -35,6 +36,8 @@ export class Config {
         },
         prefix: process.env.COMMAND_PREFIX || '!',
         token: process.env.DISCORD_TOKEN || '',
+        applicationID: process.env.DISCORD_APP_ID || '',
+        publicKey: process.env.DISCORD_PUB_KEY || '',
     }
 
     public static readonly youtube = {
@@ -56,6 +59,8 @@ export class Config {
             '1',
             '-reconnect_delay_max',
             '5',
+            '-loglevel',
+            '0',
         ],
     }
 }

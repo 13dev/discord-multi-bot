@@ -1,7 +1,7 @@
-import { TextChannel, VoiceChannel } from 'discord.js'
+import { TextChannel, VoiceBasedChannel, VoiceChannel } from 'discord.js'
 import { Readable } from 'stream'
 import hasha from 'hasha'
-import ytdl, { getInfo } from 'ytdl-core'
+import { getInfo, videoInfo } from 'ytdl-core'
 
 import {
     AudioPlayer,
@@ -16,17 +16,30 @@ import {
 } from '@discordjs/voice'
 import { Inject, Service } from 'typedi'
 import DiscordClient from '@src/adapters/discord.adapter'
-import { Queue, QueuedSong } from '@src/queue'
 import { FfmpegAdapter } from '@src/adapters/ffmpeg.adapter'
 import YoutubeAdapter from '@src/adapters/youtube.adapter'
+import { Config } from '@src/config'
+import { Queue } from 'queue-typescript'
+import { QueuedSong } from '@src/types'
 
 export enum STATUS {
     PLAYING,
     PAUSED,
 }
-
 @Service()
 export class Player {
+    @Inject()
+    private readonly discordClient!: DiscordClient
+
+    @Inject('queue')
+    private readonly queue!: Queue<QueuedSong>
+
+    @Inject()
+    private readonly ffmpegAdapter!: FfmpegAdapter
+
+    @Inject()
+    private readonly youtubeAdapter!: YoutubeAdapter
+
     public status = STATUS.PAUSED
     private voiceConnection: VoiceConnection | null = null
     private audioPlayer: AudioPlayer | null = null
@@ -35,23 +48,11 @@ export class Player {
     private lastSongURL = ''
     private positionInSeconds = 0
 
-    @Inject()
-    private readonly discordClient!: DiscordClient
-
-    @Inject()
-    private readonly queue!: Queue
-
-    @Inject()
-    private readonly ffmpegAdapter!: FfmpegAdapter
-
-    @Inject()
-    private readonly youtubeAdapter!: YoutubeAdapter
-
     public isConnected(): boolean {
         return this.voiceConnection instanceof VoiceConnection
     }
 
-    async connect(channel: VoiceChannel): Promise<void> {
+    async connect(channel: VoiceChannel | VoiceBasedChannel): Promise<void> {
         this.voiceConnection = joinVoiceChannel({
             channelId: channel.id,
             guildId: channel.guild.id,
@@ -83,7 +84,7 @@ export class Player {
             throw new Error('Not connected to a voice channel.')
         }
 
-        const currentSong = this.queue.getCurrent()
+        const currentSong = this.queue.front
 
         if (!currentSong) {
             throw new Error('No song currently playing')
@@ -96,6 +97,7 @@ export class Player {
         const stream = await this.getStream(currentSong.url, {
             seek: positionSeconds,
         })
+
         this.audioPlayer = createAudioPlayer()
         this.voiceConnection.subscribe(this.audioPlayer)
         this.audioPlayer.play(
@@ -122,7 +124,7 @@ export class Player {
             throw new Error('Not connected to a voice channel.')
         }
 
-        const currentSong = this.queue.getCurrent()
+        const currentSong = this.queue.front
 
         if (!currentSong) {
             throw new Error('Queue empty.')
@@ -152,8 +154,6 @@ export class Player {
             this.audioPlayer = createAudioPlayer()
             this.voiceConnection.subscribe(this.audioPlayer)
 
-            const createAudio()
-
             this.audioPlayer.play(
                 createAudioResource(stream, {
                     inputType: StreamType.WebmOpus,
@@ -167,14 +167,15 @@ export class Player {
 
             if (currentSong.url === this.lastSongURL) {
                 this.startTrackingPosition()
-            } else {
-                // Reset position counter
-                this.startTrackingPosition(0)
-                this.lastSongURL = currentSong.url
+                return
             }
+
+            // Reset position counter
+            this.startTrackingPosition(0)
+            this.lastSongURL = currentSong.url
         } catch (error: unknown) {
             console.log(error)
-            const currentSong = this.queue.getCurrent()
+            const currentSong = this.queue.front
             await this.forward(1)
 
             if (
@@ -214,41 +215,34 @@ export class Player {
     async forward(skip: number): Promise<void> {
         this.manualForward(skip)
 
-        try {
-            if (this.queue.getCurrent() && this.status !== STATUS.PAUSED) {
-                await this.play()
-            } else {
-                this.status = STATUS.PAUSED
-                this.disconnect()
-            }
-        } catch (error: unknown) {
-            this.queue.position--
-            throw error
+        if (this.queue.front && this.status !== STATUS.PAUSED) {
+            await this.play()
+            return
         }
+
+        this.status = STATUS.PAUSED
+        this.disconnect()
     }
 
     manualForward(skip: number): void {
-        if (this.queue.position + skip - 1 < this.queue.size()) {
-            this.queue.position += skip
-            this.positionInSeconds = 0
-            this.stopTrackingPosition()
-        } else {
+        if (this.queue.length - 1 < skip) {
             throw new Error('No songs in queue to forward to.')
         }
+
+        Array.from({ length: skip }, () => this.queue.dequeue())
     }
 
     async back(): Promise<void> {
-        if (this.queue.position - 1 >= 0) {
-            this.queue.position--
+        if (this.queue.length - 1 >= 0) {
             this.positionInSeconds = 0
             this.stopTrackingPosition()
 
             if (this.status !== STATUS.PAUSED) {
                 await this.play()
             }
-        } else {
-            throw new Error('No songs in queue to go back to.')
+            return
         }
+        throw new Error('No songs in queue to go back to.')
     }
 
     private getHashForCache(url: string): string {
@@ -267,21 +261,37 @@ export class Player {
         const info = await getInfo(url)
         const format = this.youtubeAdapter.chooseNextBestFormat(info.formats)
 
-        // Don't cache livestreams or long videos
-        const MAX_CACHE_LENGTH_SECONDS = 30 * 60 // 30 minutes
-        shouldCacheVideo =
-            !info.player_response.videoDetails.isLiveContent &&
-            parseInt(info.videoDetails.lengthSeconds, 10) <
-                MAX_CACHE_LENGTH_SECONDS &&
-            !options.seek
+        // Custom settings for live streams
+        if (info.player_response.videoDetails.isLiveContent) {
+            this.ffmpegAdapter.pushOptions(
+                '-analyzeduration',
+                '0',
+                '-probesize',
+                '32',
+                '-flags',
+                'low_delay',
+                '-fflags',
+                'nobuffer'
+            )
+        }
 
         if (options.seek) {
-            // Fudge seek position since FFMPEG doesn't do a great job
-            //this.ffmpegAdapter.pushOptions('-ss', (options.seek + 7).toString())
+            // Change seek position
+            this.ffmpegAdapter.pushOptions('-ss', (options.seek + 7).toString())
         }
 
         // Create stream and pipe to capacitor
-        return this.ffmpegAdapter.createYoutubeStream(format.url)
+        return this.ffmpegAdapter.createStream(format.url)
+    }
+
+    private shouldCacheVideo(info: videoInfo, seek: number) {
+        // Don't cache livestreams or long videos
+        const isLive = info.player_response.videoDetails.isLiveContent
+        const videoLength = parseInt(info.videoDetails.lengthSeconds, 10)
+
+        return (
+            !isLive && videoLength < Config.cache.maxCacheLengthSeconds && !seek
+        )
     }
 
     private startTrackingPosition(initalPosition?: number): void {
