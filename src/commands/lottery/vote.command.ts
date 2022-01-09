@@ -14,7 +14,7 @@ export default class extends Command {
 
     get options(): CommandOptions {
         return {
-            name: 'lottery vote',
+            name: ['lottery vote'],
             signature: {
                 command: 'lottery vote',
                 arguments: ['voteNumber'],

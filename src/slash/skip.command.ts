@@ -2,6 +2,7 @@ import { CommandContext, CommandOptionType, SlashCommand } from 'slash-create'
 import { SlashCreator } from 'slash-create/lib/creator'
 import PlayerService from '@services/player.service'
 import { Container } from 'typedi'
+import { PlayerError } from '@src/errors/player.errors'
 
 export class SkipCommand extends SlashCommand {
     private readonly playerService: PlayerService
@@ -34,8 +35,12 @@ export class SkipCommand extends SlashCommand {
         try {
             await this.playerService.get(ctx.guildID!).forward(tracksToSkip)
         } catch (e: any) {
-            await ctx.send(e.message, { ephemeral: true })
-            return
+            if (e instanceof PlayerError) {
+                await ctx.send(e.message, { ephemeral: true })
+                return
+            }
+
+            throw e
         }
 
         await ctx.send(`**${tracksToSkip}** Song(s) skipped.`, {

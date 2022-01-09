@@ -7,7 +7,7 @@ import { LoggerUtil } from '@utils/logger.util'
 export default class extends Command {
     get options(): CommandOptions {
         return {
-            name: 'clear',
+            name: ['clear', 'c'],
             signature: {
                 command: 'clear',
                 arguments: ['limit'],

@@ -6,7 +6,7 @@ import { Container, Service } from 'typedi'
 export default class extends Command {
     get options(): CommandOptions {
         return {
-            name: 'ping',
+            name: ['ping'],
             signature: {
                 command: 'ping',
                 arguments: ['s'],

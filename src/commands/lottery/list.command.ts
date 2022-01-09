@@ -32,7 +32,7 @@ export default class extends Command {
 
     get options(): CommandOptions {
         return {
-            name: 'lottery list',
+            name: ['lottery list'],
             signature: {
                 command: 'lottery list',
             },

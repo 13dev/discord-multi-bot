@@ -4,9 +4,9 @@ import { Container } from 'typeorm-typedi-extensions'
 import DiscordClient from '@src/adapters/discord.adapter'
 import { Config } from '@src/config'
 
-export default async function discordLoader() {
-    const client = Container.get(DiscordClient)
+const client = Container.get(DiscordClient)
 
+export default async function discordLoader() {
     LoggerUtil.info('Initing bot!')
 
     client.setConfig(Config.discord)

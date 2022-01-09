@@ -18,7 +18,7 @@ export interface CommandSignature {
 }
 
 export interface CommandOptions {
-    name: string
+    name: string[]
     signature: CommandSignature
     description?: string
     category?: string

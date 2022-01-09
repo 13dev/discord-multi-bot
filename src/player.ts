@@ -21,6 +21,7 @@ import YoutubeAdapter from '@src/adapters/youtube.adapter'
 import { Config } from '@src/config'
 import { Queue } from 'queue-typescript'
 import { QueuedSong } from '@src/types'
+import { PlayerError } from '@src/errors/player.errors'
 
 export enum STATUS {
     PLAYING,
@@ -81,17 +82,19 @@ export class Player {
         this.status = STATUS.PAUSED
 
         if (this.voiceConnection === null) {
-            throw new Error('Not connected to a voice channel.')
+            throw new PlayerError('Not connected to a voice channel.')
         }
 
         const currentSong = this.queue.front
 
         if (!currentSong) {
-            throw new Error('No song currently playing')
+            throw new PlayerError('No song currently playing')
         }
 
         if (positionSeconds > currentSong.length) {
-            throw new Error('Seek position is outside the range of the song.')
+            throw new PlayerError(
+                'Seek position is outside the range of the song.'
+            )
         }
 
         const stream = await this.getStream(currentSong.url, {
@@ -121,13 +124,13 @@ export class Player {
 
     async play(): Promise<void> {
         if (this.voiceConnection === null) {
-            throw new Error('Not connected to a voice channel.')
+            throw new PlayerError('Not connected to a voice channel.')
         }
 
         const currentSong = this.queue.front
 
         if (!currentSong) {
-            throw new Error('Queue empty.')
+            throw new PlayerError('Queue empty.')
         }
 
         // Resume from paused state
@@ -200,7 +203,7 @@ export class Player {
 
     pause(): void {
         if (this.status !== STATUS.PLAYING) {
-            throw new Error('Not currently playing.')
+            throw new PlayerError('Not currently playing.')
         }
 
         this.status = STATUS.PAUSED
@@ -225,8 +228,8 @@ export class Player {
     }
 
     manualForward(skip: number): void {
-        if (this.queue.length - 1 < skip) {
-            throw new Error('No songs in queue to forward to.')
+        if (skip >= this.queue.length - 1) {
+            throw new PlayerError('No songs in queue to forward to.')
         }
 
         Array.from({ length: skip }, () => this.queue.dequeue())
@@ -242,7 +245,7 @@ export class Player {
             }
             return
         }
-        throw new Error('No songs in queue to go back to.')
+        throw new PlayerError('No songs in queue to go back to.')
     }
 
     private getHashForCache(url: string): string {

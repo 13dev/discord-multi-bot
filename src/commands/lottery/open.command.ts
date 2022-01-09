@@ -33,7 +33,7 @@ export default class x extends Command {
                 command: 'lottery open',
                 arguments: [],
             },
-            name: 'lottery open',
+            name: ['lottery open'],
             description: 'Opens the current lottery to vots.',
             category: 'Information',
             requiredPermissions: ['ADMINISTRATOR'],

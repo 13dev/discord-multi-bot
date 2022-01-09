@@ -1,4 +1,9 @@
-import { Message } from 'discord.js'
+import {
+    Message,
+    MessageActionRow,
+    MessageButton,
+    MessageEmbed,
+} from 'discord.js'
 import { Command, CommandOptions } from '@src/command'
 import { Inject, Service } from 'typedi'
 import {
@@ -18,6 +23,7 @@ import { LoggerUtil } from '@utils/logger.util'
 import { PlayerProviderFactory } from '@src/factories/player-provider.factory'
 import { Queue } from 'queue-typescript'
 import { QueuedSong } from '@src/types'
+import { addedToQueueEmbed } from '@src/embeds/added.embed'
 
 @Service()
 export default class extends Command {
@@ -33,7 +39,7 @@ export default class extends Command {
 
     get options(): CommandOptions {
         return {
-            name: 'play',
+            name: ['play', 'p', 'playi', 'pi'],
             signature: {
                 command: 'play',
                 arguments: ['url'],
@@ -45,6 +51,8 @@ export default class extends Command {
     }
 
     public async run(message: Message, args: string[]): Promise<void> {
+        await message.suppressEmbeds(true)
+
         const [targetVoiceChannel] =
             getMemberVoiceChannel(message.member!) ??
             getMostPopularVoiceChannel(message.guild!)
@@ -108,21 +116,30 @@ export default class extends Command {
         // Single track added
         if (results.length == 1) {
             if (this.addToFrontOfQueue) {
-                await message.channel.send(
+                await message.reply(
                     `**${firstSong.title}** Added to the front of the queue.`
                 )
                 return
             }
 
-            await message.channel.send(
-                `**${firstSong.title}** Added to the queue.`
-            )
+            await message.reply({
+                embeds: [
+                    addedToQueueEmbed({
+                        queue: this.queue,
+                        message: message,
+                        music: results[0],
+                    }),
+                ],
+            })
+
             return
         }
 
         // Playlist added
-        await message.channel.send(
-            `**${results[0].title}** and ${this.queue.length} other songs were added to the queue`
+        await message.reply(
+            `**${results[0].title}** and ${
+                results.length - 1
+            } other songs were added to the queue.`
         )
     }
 }
