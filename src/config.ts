@@ -36,6 +36,8 @@ export class Config {
         },
         prefix: process.env.COMMAND_PREFIX || '!',
         token: process.env.DISCORD_TOKEN || '',
+        applicationID: process.env.DISCORD_APP_ID || '',
+        publicKey: process.env.DISCORD_PUB_KEY || '',
     }
 
     public static readonly youtube = {
@@ -59,16 +61,6 @@ export class Config {
             '5',
             '-loglevel',
             '0',
-
-            // no lag
-            '-analyzeduration',
-            '0',
-            '-probesize',
-            '32',
-            '-flags',
-            'low_delay',
-            '-fflags',
-            'nobuffer',
         ],
     }
 }

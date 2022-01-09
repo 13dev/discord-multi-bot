@@ -23,18 +23,10 @@ export default class extends Command {
     public async run(message: Message, args: string[]): Promise<void> {
         let tracksToSkip = 1
 
-        if (args.length === 1) {
-            if (!Number.isNaN(Number(args[0]))) {
-                tracksToSkip = Number(args[0])
-            }
+        if (args.length && Number(args[0]) > tracksToSkip) {
+            tracksToSkip = Number(args[0])
         }
 
-        const player = this.playerService.get(message.guild!.id)
-
-        try {
-            await player.forward(tracksToSkip)
-        } catch (_: unknown) {
-            await message.channel.send('No songs to skip to.')
-        }
+        await this.playerService.get(message.guild!.id).forward(tracksToSkip)
     }
 }

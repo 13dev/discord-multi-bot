@@ -24,9 +24,6 @@ export default class extends Command {
     @Inject()
     private readonly playerService!: PlayerService
 
-    @Inject()
-    private readonly getSongs!: GetSongsService
-
     @Inject('queue')
     private readonly queue!: Queue<QueuedSong>
 
@@ -87,8 +84,6 @@ export default class extends Command {
             this.addToFrontOfQueue
                 ? this.queue.prepend(queueSong)
                 : this.queue.enqueue(queueSong)
-
-
         }
 
         if (!this.queue.length) {

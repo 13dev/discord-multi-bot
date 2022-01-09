@@ -1,4 +1,4 @@
-import { TextChannel, VoiceChannel } from 'discord.js'
+import { TextChannel, VoiceBasedChannel, VoiceChannel } from 'discord.js'
 import { Readable } from 'stream'
 import hasha from 'hasha'
 import { getInfo, videoInfo } from 'ytdl-core'
@@ -52,7 +52,7 @@ export class Player {
         return this.voiceConnection instanceof VoiceConnection
     }
 
-    async connect(channel: VoiceChannel): Promise<void> {
+    async connect(channel: VoiceChannel | VoiceBasedChannel): Promise<void> {
         this.voiceConnection = joinVoiceChannel({
             channelId: channel.id,
             guildId: channel.guild.id,
@@ -215,22 +215,17 @@ export class Player {
     async forward(skip: number): Promise<void> {
         this.manualForward(skip)
 
-        try {
-            if (this.queue.front && this.status !== STATUS.PAUSED) {
-                await this.play()
-                return
-            }
-
-            this.status = STATUS.PAUSED
-            this.disconnect()
-        } catch (error: unknown) {
-            // this.queue.position--
-            throw error
+        if (this.queue.front && this.status !== STATUS.PAUSED) {
+            await this.play()
+            return
         }
+
+        this.status = STATUS.PAUSED
+        this.disconnect()
     }
 
     manualForward(skip: number): void {
-        if (this.queue.length < skip) {
+        if (this.queue.length - 1 < skip) {
             throw new Error('No songs in queue to forward to.')
         }
 
@@ -265,6 +260,20 @@ export class Player {
 
         const info = await getInfo(url)
         const format = this.youtubeAdapter.chooseNextBestFormat(info.formats)
+
+        // Custom settings for live streams
+        if (info.player_response.videoDetails.isLiveContent) {
+            this.ffmpegAdapter.pushOptions(
+                '-analyzeduration',
+                '0',
+                '-probesize',
+                '32',
+                '-flags',
+                'low_delay',
+                '-fflags',
+                'nobuffer'
+            )
+        }
 
         if (options.seek) {
             // Change seek position
